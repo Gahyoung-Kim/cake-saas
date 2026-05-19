@@ -96,6 +96,7 @@ export interface ReservationFormData {
   deposit?: number;
   depositPaid?: boolean;
   status?: ReservationStatus;
+  designImage?: string;
   rawChat?: string;
   memo?: string;
 }

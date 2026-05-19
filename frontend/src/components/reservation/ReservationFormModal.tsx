@@ -33,6 +33,7 @@ function emptyForm(): ReservationFormData {
     cakeFlavor: '',
     lettering: '',
     designNote: '',
+    designImage: '',
     price: undefined,
     deposit: undefined,
     depositPaid: false,
@@ -51,6 +52,7 @@ function reservationToForm(r: Reservation): ReservationFormData {
     cakeFlavor:    r.cakeFlavor ?? '',
     lettering:     r.lettering ?? '',
     designNote:    r.designNote ?? '',
+    designImage:   r.designImage ?? '',
     price:         r.price || undefined,
     deposit:       r.deposit || undefined,
     depositPaid:   r.depositPaid,
@@ -73,12 +75,16 @@ interface Props {
 
 export default function ReservationFormModal({ mode, reservation, open, onClose, onSuccess }: Props) {
   const qc = useQueryClient();
-  const [form, setForm] = useState<ReservationFormData>(emptyForm);
+  const [form,         setForm]         = useState<ReservationFormData>(emptyForm);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [uploading,    setUploading]    = useState(false);
 
   // open 될 때마다 폼 초기화
   useEffect(() => {
     if (!open) return;
-    setForm(mode === 'edit' && reservation ? reservationToForm(reservation) : emptyForm());
+    const next = mode === 'edit' && reservation ? reservationToForm(reservation) : emptyForm();
+    setForm(next);
+    setImagePreview(next.designImage || null);
   }, [open, mode, reservation]);
 
   const mutation = useMutation({
@@ -104,7 +110,38 @@ export default function ReservationFormModal({ mode, reservation, open, onClose,
     setForm((f) => ({ ...f, [key]: value }));
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImagePreview(URL.createObjectURL(file));
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch('/api/public/upload', { method: 'POST', body: fd });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: '업로드 실패' }));
+        throw new Error(err.detail);
+      }
+      const { url } = await res.json();
+      set('designImage', url);
+      toast.success('이미지가 업로드됐습니다.');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : '이미지 업로드에 실패했습니다.');
+      setImagePreview(null);
+      set('designImage', '');
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
+  }
+
+  function removeImage() {
+    setImagePreview(null);
+    set('designImage', '');
+  }
+
+  function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault();
     if (!form.pickupDate) { toast.error('픽업 날짜를 입력해 주세요.'); return; }
     if (!form.customerName.trim()) { toast.error('고객명을 입력해 주세요.'); return; }
@@ -226,6 +263,52 @@ export default function ReservationFormModal({ mode, reservation, open, onClose,
                     placeholder="알러지, 색상, 장식 등"
                     className={INPUT_CLS + ' h-auto py-2 resize-y leading-relaxed'}
                   />
+                </Field>
+
+                {/* ── 디자인 참고 이미지 ── */}
+                <Field label="디자인 참고 이미지">
+                  {imagePreview ? (
+                    <div className="relative">
+                      <img
+                        src={imagePreview}
+                        alt="디자인 참고"
+                        className="w-full max-h-48 object-contain rounded-lg border-[0.5px] border-border bg-surface"
+                      />
+                      {uploading && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-ink/10 rounded-lg">
+                          <div className="w-7 h-7 border-[3px] border-muted border-t-primary rounded-full animate-spin" />
+                        </div>
+                      )}
+                      {!uploading && (
+                        <button
+                          type="button"
+                          onClick={removeImage}
+                          className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center rounded-full bg-ink/50 text-bg hover:bg-ink/70 transition-colors"
+                          aria-label="이미지 삭제"
+                        >
+                          <svg viewBox="0 0 14 14" width="12" height="12">
+                            <path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                  ) : (
+                    <label className="flex flex-col items-center justify-center gap-1.5 h-24 rounded-lg border-[1.5px] border-dashed border-border hover:border-primary hover:bg-primary-light/10 transition-colors cursor-pointer">
+                      <svg viewBox="0 0 20 20" width="22" height="22" className="text-ink-muted">
+                        <rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" fill="none" strokeWidth="1.4"/>
+                        <circle cx="7.5" cy="7.5" r="1.2" fill="currentColor"/>
+                        <path d="M3 13l4-4 3 3 2.5-2.5 4 4" stroke="currentColor" fill="none" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      <span className="text-[12px] text-ink-muted">클릭해서 이미지 선택</span>
+                      <span className="text-[10px] text-ink-muted">JPG · PNG · WEBP · 최대 5MB</span>
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,image/gif"
+                        className="hidden"
+                        onChange={handleImageChange}
+                      />
+                    </label>
+                  )}
                 </Field>
               </Fieldset>
 
@@ -376,6 +459,7 @@ function buildPayload(form: ReservationFormData): ReservationFormData {
     cakeFlavor:    form.cakeFlavor?.trim() || undefined,
     lettering:     form.lettering?.trim() || undefined,
     designNote:    form.designNote?.trim() || undefined,
+    designImage:   form.designImage?.trim() || undefined,
     memo:          form.memo?.trim() || undefined,
   };
 }
