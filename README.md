@@ -15,7 +15,7 @@
 | 백엔드 | Python 3.12 + FastAPI + SQLAlchemy |
 | DB | MySQL 8.0 |
 | 인증 | JWT (python-jose + passlib/bcrypt) |
-| AI | Anthropic Claude API (claude-sonnet-4-20250514) |
+| AI | OpenAI GPT-4o mini 기반 주문 추출 (Claude API는 필요 시 검토) |
 | 패키지 | pnpm (프론트), pip (백엔드) |
 
 ---
@@ -38,6 +38,8 @@ cp .env.example .env
 
 ```env
 VITE_API_URL=http://localhost:8000
+OPENAI_API_KEY=sk-실제키값
+# 선택: Claude API 검토/전환 시 사용
 ANTHROPIC_API_KEY=sk-ant-api03-실제키값
 DATABASE_URL=mysql+pymysql://root:비밀번호@localhost:3306/cakesaas
 SECRET_KEY=랜덤_32자_문자열
@@ -144,7 +146,7 @@ curl $BASE/api/auth/me -H "Authorization: Bearer $TOKEN"
 # 예약 목록 조회
 curl "$BASE/api/orders" -H "Authorization: Bearer $TOKEN"
 
-# AI 주문 추출 (ANTHROPIC_API_KEY 설정 필요)
+# AI 주문 추출 (현재 기본: OPENAI_API_KEY 설정 필요)
 curl -X POST $BASE/api/extract \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
@@ -180,7 +182,7 @@ cake-saas/
     ├── models/             # SQLAlchemy ORM
     ├── schemas/            # Pydantic (CamelModel 기반 camelCase I/O)
     ├── services/
-    │   └── ai_extractor.py # Claude API 호출
+    │   └── ai_extractor.py # OpenAI GPT-4o mini 기반 주문 추출
     └── alembic/            # DB 마이그레이션
 ```
 
@@ -191,7 +193,8 @@ cake-saas/
 | 변수 | 설명 | 기본값 |
 |------|------|--------|
 | `VITE_API_URL` | 프론트엔드 → 백엔드 API URL | `http://localhost:8000` |
-| `ANTHROPIC_API_KEY` | Claude API 키 | — |
+| `OPENAI_API_KEY` | 현재 기본 AI 주문 추출용 OpenAI API 키 | — |
+| `ANTHROPIC_API_KEY` | Claude API 검토/전환 시 사용할 선택 키 | — |
 | `DATABASE_URL` | MySQL 연결 URL | `mysql+pymysql://...` |
 | `SECRET_KEY` | JWT 서명 시크릿 (32자 이상 랜덤) | — |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | 토큰 유효 시간 (분) | `10080` (7일) |
