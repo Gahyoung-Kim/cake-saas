@@ -1,7 +1,9 @@
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
-from .routers import auth, orders, extract, calendar, public, shop, dashboard, customers
+from .routers import auth, orders, extract, calendar, public, shop, dashboard, customers, upload
 
 app = FastAPI(title="caker API", version="0.1.0")
 
@@ -13,12 +15,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
-app.include_router(orders.router, prefix="/api/orders", tags=["orders"])
-app.include_router(extract.router, prefix="/api", tags=["extract"])
-app.include_router(calendar.router, prefix="/api", tags=["calendar"])
-app.include_router(public.router, prefix="/api/public", tags=["public"])
-app.include_router(shop.router, prefix="/api/shop", tags=["shop"])
+# 업로드 이미지 정적 서빙
+UPLOAD_DIR = os.path.join(os.path.dirname(__file__), 'uploads')
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
+
+app.include_router(auth.router,      prefix="/api/auth",      tags=["auth"])
+app.include_router(orders.router,    prefix="/api/orders",    tags=["orders"])
+app.include_router(extract.router,   prefix="/api",           tags=["extract"])
+app.include_router(calendar.router,  prefix="/api",           tags=["calendar"])
+app.include_router(public.router,    prefix="/api/public",    tags=["public"])
+app.include_router(upload.router,    prefix="/api/public",    tags=["upload"])
+app.include_router(shop.router,      prefix="/api/shop",      tags=["shop"])
 app.include_router(dashboard.router, prefix="/api/dashboard", tags=["dashboard"])
 app.include_router(customers.router, prefix="/api/customers", tags=["customers"])
 

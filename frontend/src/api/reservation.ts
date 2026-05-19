@@ -46,6 +46,20 @@ export interface ReservationListResponse {
   perPage: number;
 }
 
+// AI 추출 요청/응답
+export interface ExtractResponse {
+  customerName: string | null;
+  pickupDate: string | null;
+  pickupTime: string | null;
+  cakeSize: string | null;
+  cakeFlavor: string | null;
+  lettering: string | null;
+  designNote: string | null;
+  price: number | null;
+  deposit: number | null;
+  confidence: number;
+}
+
 export interface DashboardStats {
   monthlyCount: number;
   monthlyCountPrev: number;
@@ -82,6 +96,7 @@ export interface ReservationFormData {
   deposit?: number;
   depositPaid?: boolean;
   status?: ReservationStatus;
+  rawChat?: string;
   memo?: string;
 }
 
@@ -140,5 +155,12 @@ export const reservationApi = {
 
   dashboardStats(): Promise<DashboardStats> {
     return apiFetch<DashboardStats>('/api/dashboard/stats');
+  },
+
+  extract(chatText: string): Promise<ExtractResponse> {
+    return apiFetch<ExtractResponse>('/api/extract', {
+      method: 'POST',
+      body: JSON.stringify({ chatText }),
+    });
   },
 };

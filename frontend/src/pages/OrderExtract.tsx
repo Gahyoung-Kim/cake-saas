@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { ordersApi } from '../api/orders';
-import type { ExtractResponse } from '../api/orders';
+import { reservationApi } from '../api/reservation';
+import type { ExtractResponse } from '../api/reservation';
 import AppLayout from '../components/AppLayout';
 import ChatPasteBox from '../components/ChatPasteBox';
 
@@ -48,7 +48,7 @@ export default function OrderExtract() {
     });
 
     try {
-      const res = await ordersApi.extract({ chatText });
+      const res = await reservationApi.extract(chatText);
       setResult(res);
       setForm(res);
     } catch (err) {
@@ -63,7 +63,7 @@ export default function OrderExtract() {
     if (!form.pickupDate) { toast.error('픽업 날짜를 입력해 주세요.'); return; }
     setSaving(true);
     try {
-      await ordersApi.create({
+      await reservationApi.create({
         customerName: form.customerName ?? '',
         pickupDate:   form.pickupDate,
         pickupTime:   form.pickupTime   ?? undefined,

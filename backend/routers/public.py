@@ -45,6 +45,7 @@ def submit_public_order(
         cake_flavor=body.cake_flavor,
         lettering=body.lettering,
         design_note=body.design_note,
+        design_image=body.design_image,
         status=OrderStatus.inquiry,
     )
     db.add(order)

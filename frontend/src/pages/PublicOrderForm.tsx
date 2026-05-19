@@ -24,6 +24,7 @@ interface FormState {
   cakeFlavor:    string;
   lettering:     string;
   designNote:    string;
+  designImage:   string;   // 업로드 후 URL
 }
 
 const INPUT_CLS = 'w-full bg-white border-[0.5px] border-border rounded-md px-3 h-[44px] text-[14px] text-ink outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(200,145,122,0.18)] transition-[border-color,box-shadow] duration-200 placeholder:text-ink-muted';
@@ -37,8 +38,10 @@ export default function PublicOrderForm() {
   const [form, setForm] = useState<FormState>({
     customerName: '', customerPhone: '', pickupDate: '',
     pickupTime: '', cakeSize: '', cakeFlavor: '',
-    lettering: '', designNote: '',
+    lettering: '', designNote: '', designImage: '',
   });
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [uploading,    setUploading]    = useState(false);
 
   const { data, isLoading, isError } = useQuery<PublicShop>({
     queryKey: ['public-shop', slug],
@@ -61,7 +64,40 @@ export default function PublicOrderForm() {
     setForm((f) => ({ ...f, [key]: value }));
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // 미리보기
+    setImagePreview(URL.createObjectURL(file));
+
+    // 업로드
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch('/api/public/upload', { method: 'POST', body: fd });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: '업로드 실패' }));
+        throw new Error(err.detail);
+      }
+      const { url } = await res.json();
+      update('designImage', url);
+      toast.success('이미지가 업로드됐습니다.');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : '이미지 업로드에 실패했습니다.');
+      setImagePreview(null);
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  function removeImage() {
+    setImagePreview(null);
+    update('designImage', '');
+  }
+
+  function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault();
     if (!form.cakeSize && data?.sizeOptions.length) {
       toast.error('케이크 사이즈를 선택해 주세요.');
@@ -129,6 +165,8 @@ export default function PublicOrderForm() {
   }
 
   /* ── 폼 ── */
+  const isDirty = Object.values(form).some((v) => v !== '');
+
   return (
     <div className="min-h-screen bg-bg">
       {/* Header */}
@@ -139,10 +177,20 @@ export default function PublicOrderForm() {
             <rect x="8" y="14" width="16" height="6" rx="1" fill="var(--color-primary-light)" />
             <circle cx="16" cy="11" r="2" fill="var(--color-primary-dark)" />
           </svg>
-          <div>
-            <div className="text-[13px] font-semibold text-ink leading-tight">{data.shopName}</div>
+          <div className="flex-1 min-w-0">
+            <div className="text-[13px] font-semibold text-ink leading-tight truncate">{data.shopName}</div>
             <div className="text-[11px] text-ink-muted leading-tight">케이크 주문서</div>
           </div>
+          {/* 처음부터 버튼 — 입력 내용이 있을 때만 표시 */}
+          {isDirty && (
+            <button
+              type="button"
+              onClick={() => { setForm({ customerName: '', customerPhone: '', pickupDate: '', pickupTime: '', cakeSize: '', cakeFlavor: '', lettering: '', designNote: '', designImage: '' }); setImagePreview(null); }}
+              className="shrink-0 text-[12px] text-ink-muted hover:text-ink border-[0.5px] border-border rounded-md px-2.5 h-8 transition-colors"
+            >
+              처음부터
+            </button>
+          )}
         </div>
       </header>
 
@@ -227,6 +275,55 @@ export default function PublicOrderForm() {
               placeholder="알러지, 색상, 장식 등 자유롭게 적어주세요."
               className={`${INPUT_CLS} h-auto py-3 resize-y leading-relaxed`}
             />
+          </Field>
+
+          {/* ── 디자인 참고 이미지 ── */}
+          <Field label="디자인 참고 이미지">
+            {imagePreview ? (
+              <div className="relative">
+                <img
+                  src={imagePreview}
+                  alt="디자인 참고"
+                  className="w-full max-h-64 object-contain rounded-xl border-[0.5px] border-border bg-surface"
+                />
+                {/* 업로드 중 오버레이 */}
+                {uploading && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-ink/10 rounded-xl">
+                    <div className="w-8 h-8 border-[3px] border-muted border-t-primary rounded-full animate-spin" />
+                  </div>
+                )}
+                {/* 삭제 버튼 */}
+                {!uploading && (
+                  <button
+                    type="button"
+                    onClick={removeImage}
+                    className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-full bg-ink/50 text-bg hover:bg-ink/70 transition-colors"
+                    aria-label="이미지 삭제"
+                  >
+                    <svg viewBox="0 0 16 16" width="14" height="14">
+                      <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                    </svg>
+                  </button>
+                )}
+              </div>
+            ) : (
+              <label className="flex flex-col items-center justify-center gap-2 h-32 rounded-xl border-[1.5px] border-dashed border-border hover:border-primary hover:bg-primary-light/20 transition-colors cursor-pointer">
+                <svg viewBox="0 0 24 24" width="28" height="28" className="text-ink-muted">
+                  <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" fill="none" strokeWidth="1.5"/>
+                  <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/>
+                  <path d="M3 15l5-5 4 4 3-3 5 5" stroke="currentColor" fill="none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span className="text-[13px] text-ink-muted">탭해서 사진 선택</span>
+                <span className="text-[11px] text-ink-muted">JPG, PNG, WEBP · 최대 5MB</span>
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  className="hidden"
+                  onChange={handleImageChange}
+                />
+              </label>
+            )}
+            <p className="text-[11px] text-ink-muted mt-1">원하는 디자인 참고 사진을 첨부하면 제작에 도움이 됩니다.</p>
           </Field>
         </Fieldset>
 

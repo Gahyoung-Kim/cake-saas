@@ -48,3 +48,4 @@ class PublicOrderCreate(CamelModel):
     cake_flavor: str | None = None
     lettering: str | None = None
     design_note: str | None = None
+    design_image: str | None = None   # 업로드된 이미지 URL

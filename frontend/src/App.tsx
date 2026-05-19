@@ -9,6 +9,7 @@ import PublicOrderForm from './pages/PublicOrderForm';
 import Settings from './pages/Settings';
 import ReservationListPage from './pages/ReservationListPage';
 import CustomerListPage from './pages/CustomerListPage';
+import TodayPickupPage from './pages/TodayPickupPage';
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const token = useAuthStore((s) => s.token);
@@ -34,6 +35,7 @@ export default function App() {
         <Route path="/calendar"     element={<PrivateRoute><CalendarPage /></PrivateRoute>} />
         <Route path="/reservations" element={<PrivateRoute><ReservationListPage /></PrivateRoute>} />
         <Route path="/customers"    element={<PrivateRoute><CustomerListPage /></PrivateRoute>} />
+        <Route path="/today"        element={<PrivateRoute><TodayPickupPage /></PrivateRoute>} />
         <Route path="/order-form"   element={<PrivateRoute><OrderForm /></PrivateRoute>} />
         <Route path="/settings"     element={<PrivateRoute><Settings /></PrivateRoute>} />
 
