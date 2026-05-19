@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=1280" />
+<title>caker · 대시보드</title>
+
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&display=swap" />
+
+<link rel="stylesheet" href="tokens.css" />
+<link rel="stylesheet" href="dashboard.css" />
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="sb-shop">
+      <div class="shop-mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32" width="22" height="22">
+          <path d="M6 22 C6 19, 9 18, 16 18 C23 18, 26 19, 26 22 L26 26 L6 26 Z" fill="var(--color-primary)"/>
+          <rect x="8" y="14" width="16" height="6" rx="1" fill="var(--color-primary-light)"/>
+          <circle cx="16" cy="11" r="2" fill="var(--color-primary-dark)"/>
+          <rect x="15.4" y="6" width="1.2" height="5" rx="0.6" fill="var(--color-primary-dark)"/>
+        </svg>
+      </div>
+      <div class="shop-text">
+        <div class="shop-name">소라의 디저트</div>
+        <div class="shop-meta">서울 · 연남동</div>
+      </div>
+    </div>
+
+    <nav class="sb-nav">
+      <div class="sb-section">메인</div>
+      <a class="sb-item is-active">
+        <svg viewBox="0 0 16 16" width="16" height="16"><rect x="2" y="2" width="5" height="5" rx="1" fill="currentColor"/><rect x="9" y="2" width="5" height="5" rx="1" fill="currentColor" opacity=".5"/><rect x="2" y="9" width="5" height="5" rx="1" fill="currentColor" opacity=".5"/><rect x="9" y="9" width="5" height="5" rx="1" fill="currentColor" opacity=".5"/></svg>
+        <span>대시보드</span>
+      </a>
+      <a class="sb-item">
+        <svg viewBox="0 0 16 16" width="16" height="16"><path d="M3 3l4.5 4.5L3 12M8 12h5" stroke="currentColor" fill="none" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>예약 추출</span>
+        <span class="sb-pill">AI</span>
+      </a>
+      <a class="sb-item">
+        <svg viewBox="0 0 16 16" width="16" height="16"><rect x="2" y="3" width="12" height="11" rx="1.5" stroke="currentColor" fill="none" stroke-width="1.4"/><path d="M2 6h12M5.5 1.5v3M10.5 1.5v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        <span>캘린더</span>
+      </a>
+      <a class="sb-item">
+        <svg viewBox="0 0 16 16" width="16" height="16"><rect x="3" y="2" width="10" height="12" rx="1.5" stroke="currentColor" fill="none" stroke-width="1.4"/><path d="M5.5 5.5h5M5.5 8h5M5.5 10.5h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        <span>주문서 설정</span>
+      </a>
+      <a class="sb-item">
+        <svg viewBox="0 0 16 16" width="16" height="16"><circle cx="8" cy="8" r="2" stroke="currentColor" fill="none" stroke-width="1.4"/><path d="M8 1v2m0 10v2m7-7h-2M3 8H1m11.9-4.9l-1.4 1.4M4.5 11.5l-1.4 1.4m9.8 0l-1.4-1.4M4.5 4.5L3.1 3.1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        <span>설정</span>
+      </a>
+    </nav>
+
+    <div class="sb-card">
+      <div class="sb-card-title">이번 달 사용량</div>
+      <div class="sb-card-bar"><div class="sb-card-fill" style="width:62%"></div></div>
+      <div class="sb-card-meta"><span>AI 추출</span><span>62 / 100</span></div>
+    </div>
+
+    <div class="sb-foot">
+      <div class="sb-avatar">소</div>
+      <div class="sb-user">
+        <div class="sb-user-name">김소라</div>
+        <div class="sb-user-mail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="89fae6fbe8c9eae8e2ecfbf0a7e2fb">[email&#160;protected]</a></div>
+      </div>
+      <button class="sb-logout" aria-label="로그아웃">
+        <svg viewBox="0 0 16 16" width="14" height="14"><path d="M9 3H3.5A.5.5 0 003 3.5v9a.5.5 0 00.5.5H9M7 8h8m-3-3l3 3-3 3" stroke="currentColor" fill="none" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main">
+
+    <!-- top header -->
+    <header class="page-head">
+      <div>
+        <div class="page-eyebrow">2026년 5월 18일 · 일요일</div>
+        <h1 class="page-title">대시보드</h1>
+        <p class="page-sub">오늘은 픽업 3건, 회신 대기 5건이 있어요.</p>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn-secondary btn-md">
+          <svg viewBox="0 0 16 16" width="14" height="14"><path d="M3 4h10M3 8h10M3 12h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          내보내기
+        </button>
+        <button class="btn btn-primary btn-md fab-ai">
+          <span class="ai-sparkle" aria-hidden="true">
+            <svg viewBox="0 0 16 16" width="14" height="14"><path d="M8 1.5l1.4 3.6L13 6.5l-3.6 1.4L8 11.5 6.6 7.9 3 6.5l3.6-1.4L8 1.5zM12.5 11l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8L10 13.5l1.8-.7.7-1.8z" fill="currentColor"/></svg>
+          </span>
+          AI로 주문 추출하기
+        </button>
+      </div>
+    </header>
+
+    <!-- summary cards -->
+    <section class="summary">
+      <article class="sm-card">
+        <div class="sm-head">
+          <span class="sm-label">오늘 예약</span>
+          <span class="sm-icon sm-icon-primary">
+            <svg viewBox="0 0 16 16" width="14" height="14"><rect x="2" y="3" width="12" height="11" rx="1.5" stroke="currentColor" fill="none" stroke-width="1.4"/><path d="M2 6h12M5.5 1.5v3M10.5 1.5v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          </span>
+        </div>
+        <div class="sm-value">3<span class="sm-unit">건</span></div>
+        <div class="sm-foot">
+          <span class="sm-dot dot-making"></span>제작중 2 ·
+          <span class="sm-dot dot-confirmed"></span>확정 1
+        </div>
+      </article>
+
+      <article class="sm-card">
+        <div class="sm-head">
+          <span class="sm-label">이번 주 예약</span>
+          <span class="sm-icon sm-icon-soft">
+            <svg viewBox="0 0 16 16" width="14" height="14"><path d="M2 11l3-3 3 3 5-6" stroke="currentColor" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+        </div>
+        <div class="sm-value">12<span class="sm-unit">건</span></div>
+        <div class="sm-foot">
+          <span class="delta delta-up">
+            <svg viewBox="0 0 12 12" width="10" height="10"><path d="M6 2l3 4H3l3-4z" fill="currentColor"/></svg>
+            3건
+          </span>
+          <span class="sm-muted">지난주 대비</span>
+        </div>
+      </article>
+
+      <article class="sm-card sm-card-warn">
+        <div class="sm-head">
+          <span class="sm-label">미입금</span>
+          <span class="sm-icon sm-icon-danger">
+            <svg viewBox="0 0 16 16" width="14" height="14"><circle cx="8" cy="8" r="6" stroke="currentColor" fill="none" stroke-width="1.4"/><path d="M8 5v3.5M8 10.5v.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          </span>
+        </div>
+        <div class="sm-value sm-value-danger">2<span class="sm-unit">건</span></div>
+        <div class="sm-foot">
+          <span class="sm-amount">₩113,000 미수금</span>
+        </div>
+      </article>
+    </section>
+
+    <!-- reservation list section -->
+    <section class="rsv-section">
+      <div class="rsv-head">
+        <div>
+          <h2 class="rsv-title">예약 목록</h2>
+          <p class="rsv-sub">총 18건 · 최근 7일</p>
+        </div>
+        <div class="rsv-tools">
+          <div class="search">
+            <svg viewBox="0 0 16 16" width="14" height="14"><circle cx="7" cy="7" r="4.5" stroke="currentColor" fill="none" stroke-width="1.4"/><path d="M11 11l3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+            <input placeholder="고객명, 메뉴 검색" />
+          </div>
+          <button class="btn btn-secondary btn-md">
+            <svg viewBox="0 0 16 16" width="14" height="14"><path d="M2 4h12M4 8h8M6 12h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            정렬
+          </button>
+        </div>
+      </div>
+
+      <div class="filter-tabs" role="tablist">
+        <button class="filter-tab is-active">전체 <span class="tab-count">18</span></button>
+        <button class="filter-tab">문의 <span class="tab-count">5</span></button>
+        <button class="filter-tab">확정 <span class="tab-count">6</span></button>
+        <button class="filter-tab">제작중 <span class="tab-count">4</span></button>
+        <button class="filter-tab">완료 <span class="tab-count">3</span></button>
+      </div>
+
+      <!-- Table-like reservation rows -->
+      <div class="rsv-table" role="table">
+        <div class="rsv-row rsv-row-head" role="row">
+          <div>픽업일</div>
+          <div>고객</div>
+          <div>케이크</div>
+          <div>금액 · 입금</div>
+          <div>상태</div>
+          <div></div>
+        </div>
+
+        <!-- Row 1 -->
+        <div class="rsv-row" role="row">
+          <div class="cell-date">
+            <div class="date-day">05.18</div>
+            <div class="date-sub">Sun · 14:00</div>
+          </div>
+          <div class="cell-cust">
+            <div class="cust-name">김지은</div>
+            <div class="cust-meta">010-1234-5678 · 카카오톡</div>
+          </div>
+          <div class="cell-cake">
+            <div class="cake-title">딸기 생크림 케이크 · 6호</div>
+            <div class="cake-opts">
+              <span class="opt">레터링: Happy Birthday Sora</span>
+              <span class="opt">초 5+1</span>
+            </div>
+          </div>
+          <div class="cell-pay">
+            <div class="pay-amount">₩68,000</div>
+            <span class="pay-badge pay-paid">입금 완료</span>
+          </div>
+          <div class="cell-status">
+            <div class="status-select" data-status="making">
+              <span class="badge badge-making"><span class="dot"></span>제작중</span>
+              <svg viewBox="0 0 12 12" width="10" height="10"><path d="M3 5l3 3 3-3" stroke="currentColor" fill="none" stroke-width="1.6"/></svg>
+            </div>
+          </div>
+          <div class="cell-more">
+            <button class="icon-btn" aria-label="더보기">
+              <svg viewBox="0 0 16 16" width="14" height="14"><circle cx="3" cy="8" r="1.3" fill="currentColor"/><circle cx="8" cy="8" r="1.3" fill="currentColor"/><circle cx="13" cy="8" r="1.3" fill="currentColor"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Row 2 -->
+        <div class="rsv-row" role="row">
+          <div class="cell-date">
+            <div class="date-day">05.18</div>
+            <div class="date-sub">Sun · 16:30</div>
+          </div>
+          <div class="cell-cust">
+            <div class="cust-name">박서연</div>
+            <div class="cust-meta">010-2345-6789 · 인스타그램</div>
+          </div>
+          <div class="cell-cake">
+            <div class="cake-title">티라미수 케이크 · 4호</div>
+            <div class="cake-opts">
+              <span class="opt">레터링 없음</span>
+              <span class="opt opt-warn">견과류 제외</span>
+            </div>
+          </div>
+          <div class="cell-pay">
+            <div class="pay-amount">₩45,000</div>
+            <span class="pay-badge pay-paid">입금 완료</span>
+          </div>
+          <div class="cell-status">
+            <div class="status-select" data-status="confirmed">
+              <span class="badge badge-confirmed"><span class="dot"></span>확정</span>
+              <svg viewBox="0 0 12 12" width="10" height="10"><path d="M3 5l3 3 3-3" stroke="currentColor" fill="none" stroke-width="1.6"/></svg>
+            </div>
+          </div>
+          <div class="cell-more">
+            <button class="icon-btn" aria-label="더보기">
+              <svg viewBox="0 0 16 16" width="14" height="14"><circle cx="3" cy="8" r="1.3" fill="currentColor"/><circle cx="8" cy="8" r="1.3" fill="currentColor"/><circle cx="13" cy="8" r="1.3" fill="currentColor"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Row 3 -->
+        <div class="rsv-row" role="row">
+          <div class="cell-date">
+            <div class="date-day">05.18</div>
+            <div class="date-sub">Sun · 18:00</div>
+          </div>
+          <div class="cell-cust">
+            <div class="cust-name">이주현</div>
+            <div class="cust-meta">010-3456-7890 · 네이버 폼</div>
+          </div>
+          <div class="cell-cake">
+            <div class="cake-title">초콜릿 가나슈 · 6호</div>
+            <div class="cake-opts">
+              <span class="opt">레터링: 정년퇴임 축하해요</span>
+              <span class="opt">픽업 박스 大</span>
+            </div>
+          </div>
+          <div class="cell-pay">
+            <div class="pay-amount">₩72,000</div>
+            <span class="pay-badge pay-unpaid">미입금</span>
+          </div>
+          <div class="cell-status">
+            <div class="status-select" data-status="making">
+              <span class="badge badge-making"><span class="dot"></span>제작중</span>
+              <svg viewBox="0 0 12 12" width="10" height="10"><path d="M3 5l3 3 3-3" stroke="currentColor" fill="none" stroke-width="1.6"/></svg>
+            </div>
+          </div>
+          <div class="cell-more">
+            <button class="icon-btn" aria-label="더보기">
+              <svg viewBox="0 0 16 16" width="14" height="14"><circle cx="3" cy="8" r="1.3" fill="currentColor"/><circle cx="8" cy="8" r="1.3" fill="currentColor"/><circle cx="13" cy="8" r="1.3" fill="currentColor"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Row 4 -->
+        <div class="rsv-row" role="row">
+          <div class="cell-date">
+            <div class="date-day">05.19</div>
+            <div class="date-sub">Mon · 13:00</div>
+          </div>
+          <div class="cell-cust">
+            <div class="cust-name">정민호</div>
+            <div class="cust-meta">인스타그램 DM</div>
+          </div>
+          <div class="cell-cake">
+            <div class="cake-title">당근 케이크 · 6호 <span class="cake-tentative">(예상)</span></div>
+            <div class="cake-opts">
+              <span class="opt">아이 돌잔치용</span>
+              <span class="opt">픽업 시간 조율</span>
+            </div>
+          </div>
+          <div class="cell-pay">
+            <div class="pay-amount pay-amount-muted">견적 예정</div>
+            <span class="pay-badge pay-pending">결제 대기</span>
+          </div>
+          <div class="cell-status">
+            <div class="status-select" data-status="inquiry">
+              <span class="badge badge-inquiry"><span class="dot"></span>문의</span>
+              <svg viewBox="0 0 12 12" width="10" height="10"><path d="M3 5l3 3 3-3" stroke="currentColor" fill="none" stroke-width="1.6"/></svg>
+            </div>
+          </div>
+          <div class="cell-more">
+            <button class="icon-btn" aria-label="더보기">
+              <svg viewBox="0 0 16 16" width="14" height="14"><circle cx="3" cy="8" r="1.3" fill="currentColor"/><circle cx="8" cy="8" r="1.3" fill="currentColor"/><circle cx="13" cy="8" r="1.3" fill="currentColor"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Row 5 -->
+        <div class="rsv-row" role="row">
+          <div class="cell-date">
+            <div class="date-day">05.20</div>
+            <div class="date-sub">Tue · 15:30</div>
+          </div>
+          <div class="cell-cust">
+            <div class="cust-name">윤채린</div>
+            <div class="cust-meta">010-4567-8901 · 카카오톡</div>
+          </div>
+          <div class="cell-cake">
+            <div class="cake-title">레몬 시폰 · 4호</div>
+            <div class="cake-opts">
+              <span class="opt">레터링: Sweet 16</span>
+              <span class="opt">생화 데코</span>
+            </div>
+          </div>
+          <div class="cell-pay">
+            <div class="pay-amount">₩52,000</div>
+            <span class="pay-badge pay-paid">입금 완료</span>
+          </div>
+          <div class="cell-status">
+            <div class="status-select" data-status="confirmed">
+              <span class="badge badge-confirmed"><span class="dot"></span>확정</span>
+              <svg viewBox="0 0 12 12" width="10" height="10"><path d="M3 5l3 3 3-3" stroke="currentColor" fill="none" stroke-width="1.6"/></svg>
+            </div>
+          </div>
+          <div class="cell-more">
+            <button class="icon-btn" aria-label="더보기">
+              <svg viewBox="0 0 16 16" width="14" height="14"><circle cx="3" cy="8" r="1.3" fill="currentColor"/><circle cx="8" cy="8" r="1.3" fill="currentColor"/><circle cx="13" cy="8" r="1.3" fill="currentColor"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Row 6 -->
+        <div class="rsv-row" role="row">
+          <div class="cell-date">
+            <div class="date-day">05.21</div>
+            <div class="date-sub">Wed · 11:00</div>
+          </div>
+          <div class="cell-cust">
+            <div class="cust-name">최도윤</div>
+            <div class="cust-meta">010-5678-9012 · 네이버 폼</div>
+          </div>
+          <div class="cell-cake">
+            <div class="cake-title">얼그레이 무스 · 6호</div>
+            <div class="cake-opts">
+              <span class="opt">레터링 없음</span>
+            </div>
+          </div>
+          <div class="cell-pay">
+            <div class="pay-amount">₩58,000</div>
+            <span class="pay-badge pay-unpaid">미입금</span>
+          </div>
+          <div class="cell-status">
+            <div class="status-select" data-status="confirmed">
+              <span class="badge badge-confirmed"><span class="dot"></span>확정</span>
+              <svg viewBox="0 0 12 12" width="10" height="10"><path d="M3 5l3 3 3-3" stroke="currentColor" fill="none" stroke-width="1.6"/></svg>
+            </div>
+          </div>
+          <div class="cell-more">
+            <button class="icon-btn" aria-label="더보기">
+              <svg viewBox="0 0 16 16" width="14" height="14"><circle cx="3" cy="8" r="1.3" fill="currentColor"/><circle cx="8" cy="8" r="1.3" fill="currentColor"/><circle cx="13" cy="8" r="1.3" fill="currentColor"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Row 7 -->
+        <div class="rsv-row" role="row">
+          <div class="cell-date">
+            <div class="date-day">05.22</div>
+            <div class="date-sub">Thu · 17:00</div>
+          </div>
+          <div class="cell-cust">
+            <div class="cust-name">한예린</div>
+            <div class="cust-meta">010-6789-0123 · 카카오톡</div>
+          </div>
+          <div class="cell-cake">
+            <div class="cake-title">바닐라 빈 · 4호</div>
+            <div class="cake-opts">
+              <span class="opt">레터링: 사랑해 엄마</span>
+              <span class="opt">테이크아웃 포장</span>
+            </div>
+          </div>
+          <div class="cell-pay">
+            <div class="pay-amount">₩42,000</div>
+            <span class="pay-badge pay-paid">입금 완료</span>
+          </div>
+          <div class="cell-status">
+            <div class="status-select" data-status="confirmed">
+              <span class="badge badge-confirmed"><span class="dot"></span>확정</span>
+              <svg viewBox="0 0 12 12" width="10" height="10"><path d="M3 5l3 3 3-3" stroke="currentColor" fill="none" stroke-width="1.6"/></svg>
+            </div>
+          </div>
+          <div class="cell-more">
+            <button class="icon-btn" aria-label="더보기">
+              <svg viewBox="0 0 16 16" width="14" height="14"><circle cx="3" cy="8" r="1.3" fill="currentColor"/><circle cx="8" cy="8" r="1.3" fill="currentColor"/><circle cx="13" cy="8" r="1.3" fill="currentColor"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Row 8 -->
+        <div class="rsv-row rsv-row-done" role="row">
+          <div class="cell-date">
+            <div class="date-day">05.17</div>
+            <div class="date-sub">Sat · 16:00</div>
+          </div>
+          <div class="cell-cust">
+            <div class="cust-name">송지아</div>
+            <div class="cust-meta">010-7890-1234 · 카카오톡</div>
+          </div>
+          <div class="cell-cake">
+            <div class="cake-title">피스타치오 · 4호</div>
+            <div class="cake-opts">
+              <span class="opt">레터링: 첫 출근 축하해</span>
+            </div>
+          </div>
+          <div class="cell-pay">
+            <div class="pay-amount">₩48,000</div>
+            <span class="pay-badge pay-paid">입금 완료</span>
+          </div>
+          <div class="cell-status">
+            <div class="status-select" data-status="done">
+              <span class="badge badge-done"><span class="dot"></span>완료</span>
+              <svg viewBox="0 0 12 12" width="10" height="10"><path d="M3 5l3 3 3-3" stroke="currentColor" fill="none" stroke-width="1.6"/></svg>
+            </div>
+          </div>
+          <div class="cell-more">
+            <button class="icon-btn" aria-label="더보기">
+              <svg viewBox="0 0 16 16" width="14" height="14"><circle cx="3" cy="8" r="1.3" fill="currentColor"/><circle cx="8" cy="8" r="1.3" fill="currentColor"/><circle cx="13" cy="8" r="1.3" fill="currentColor"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- pagination -->
+      <div class="rsv-pagination">
+        <span>1–8 / 18</span>
+        <div class="row gap-1">
+          <button class="page-btn" disabled>‹</button>
+          <button class="page-btn is-active">1</button>
+          <button class="page-btn">2</button>
+          <button class="page-btn">3</button>
+          <button class="page-btn">›</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Empty state preview (hidden by default, exposed via tweak later) -->
+    <section class="rsv-section" id="empty-section">
+      <div class="rsv-head">
+        <div>
+          <h2 class="rsv-title">빈 상태 미리보기</h2>
+          <p class="rsv-sub">예약이 한 건도 없을 때의 모습</p>
+        </div>
+      </div>
+      <div class="empty">
+        <div class="empty-art" aria-hidden="true">
+          <svg viewBox="0 0 120 120" width="120" height="120">
+            <ellipse cx="60" cy="98" rx="42" ry="4" fill="#F2C4B0" opacity=".4"/>
+            <!-- Plate -->
+            <ellipse cx="60" cy="92" rx="44" ry="6" fill="#E8D5CC"/>
+            <!-- Cake bottom layer -->
+            <path d="M22 88 C22 78, 30 74, 60 74 C90 74, 98 78, 98 88 L98 92 L22 92 Z" fill="#F2C4B0"/>
+            <!-- frosting drips -->
+            <path d="M22 88 Q26 84 30 88 Q34 84 38 88 Q42 84 46 88 Q50 84 54 88 Q58 84 62 88 Q66 84 70 88 Q74 84 78 88 Q82 84 86 88 Q90 84 94 88 Q97 86 98 88" fill="#FBE4D8"/>
+            <!-- cake top layer -->
+            <rect x="32" y="58" width="56" height="20" rx="2" fill="#C8917A"/>
+            <!-- top frosting -->
+            <path d="M32 60 Q36 56 40 60 Q44 56 48 60 Q52 56 56 60 Q60 56 64 60 Q68 56 72 60 Q76 56 80 60 Q84 56 88 60 L88 64 L32 64 Z" fill="#F2C4B0"/>
+            <!-- candle -->
+            <rect x="58" y="44" width="4" height="14" rx="0.5" fill="#FFFDF5" stroke="#A0685A" stroke-width="0.8"/>
+            <!-- flame -->
+            <path d="M60 36 Q57 40 60 44 Q63 40 60 36 Z" fill="#D4A850"/>
+            <!-- strawberries -->
+            <circle cx="40" cy="72" r="3.2" fill="#C4706A"/>
+            <circle cx="60" cy="71" r="3.2" fill="#C4706A"/>
+            <circle cx="80" cy="72" r="3.2" fill="#C4706A"/>
+            <!-- sparkle -->
+            <path d="M22 32 l1 -3 l1 3 l3 1 l-3 1 l-1 3 l-1 -3 l-3 -1 z" fill="#D4A850" opacity=".7"/>
+            <path d="M98 24 l1 -3 l1 3 l3 1 l-3 1 l-1 3 l-1 -3 l-3 -1 z" fill="#C8917A" opacity=".6"/>
+          </svg>
+        </div>
+        <h3 class="empty-title">아직 예약이 없어요</h3>
+        <p class="empty-desc">고객님께 받은 카카오톡 주문이나 폼 답변을<br/>AI가 자동으로 정리해드릴 수 있어요.</p>
+        <div class="row gap-2">
+          <button class="btn btn-secondary btn-md">주문서 양식 보기</button>
+          <button class="btn btn-primary btn-md">
+            <span class="ai-sparkle" aria-hidden="true">
+              <svg viewBox="0 0 16 16" width="14" height="14"><path d="M8 1.5l1.4 3.6L13 6.5l-3.6 1.4L8 11.5 6.6 7.9 3 6.5l3.6-1.4L8 1.5zM12.5 11l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8L10 13.5l1.8-.7.7-1.8z" fill="currentColor"/></svg>
+            </span>
+            첫 예약 추출하기
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script></body>
+</html>

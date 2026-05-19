@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=1280" />
+<title>caker · AI 주문 추출</title>
+
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&display=swap" />
+
+<link rel="stylesheet" href="tokens.css" />
+<link rel="stylesheet" href="dashboard.css" />
+<link rel="stylesheet" href="extract.css" />
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="sb-shop">
+      <div class="shop-mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32" width="22" height="22">
+          <path d="M6 22 C6 19, 9 18, 16 18 C23 18, 26 19, 26 22 L26 26 L6 26 Z" fill="var(--color-primary)"/>
+          <rect x="8" y="14" width="16" height="6" rx="1" fill="var(--color-primary-light)"/>
+          <circle cx="16" cy="11" r="2" fill="var(--color-primary-dark)"/>
+          <rect x="15.4" y="6" width="1.2" height="5" rx="0.6" fill="var(--color-primary-dark)"/>
+        </svg>
+      </div>
+      <div class="shop-text">
+        <div class="shop-name">소라의 디저트</div>
+        <div class="shop-meta">서울 · 연남동</div>
+      </div>
+    </div>
+
+    <nav class="sb-nav">
+      <div class="sb-section">메인</div>
+      <a class="sb-item" href="dashboard.html">
+        <svg viewBox="0 0 16 16" width="16" height="16"><rect x="2" y="2" width="5" height="5" rx="1" fill="currentColor"/><rect x="9" y="2" width="5" height="5" rx="1" fill="currentColor" opacity=".5"/><rect x="2" y="9" width="5" height="5" rx="1" fill="currentColor" opacity=".5"/><rect x="9" y="9" width="5" height="5" rx="1" fill="currentColor" opacity=".5"/></svg>
+        <span>대시보드</span>
+      </a>
+      <a class="sb-item is-active">
+        <svg viewBox="0 0 16 16" width="16" height="16"><path d="M3 3l4.5 4.5L3 12M8 12h5" stroke="currentColor" fill="none" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>예약 추출</span>
+        <span class="sb-pill">AI</span>
+      </a>
+      <a class="sb-item">
+        <svg viewBox="0 0 16 16" width="16" height="16"><rect x="2" y="3" width="12" height="11" rx="1.5" stroke="currentColor" fill="none" stroke-width="1.4"/><path d="M2 6h12M5.5 1.5v3M10.5 1.5v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        <span>캘린더</span>
+      </a>
+      <a class="sb-item">
+        <svg viewBox="0 0 16 16" width="16" height="16"><rect x="3" y="2" width="10" height="12" rx="1.5" stroke="currentColor" fill="none" stroke-width="1.4"/><path d="M5.5 5.5h5M5.5 8h5M5.5 10.5h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        <span>주문서 설정</span>
+      </a>
+      <a class="sb-item">
+        <svg viewBox="0 0 16 16" width="16" height="16"><circle cx="8" cy="8" r="2" stroke="currentColor" fill="none" stroke-width="1.4"/><path d="M8 1v2m0 10v2m7-7h-2M3 8H1m11.9-4.9l-1.4 1.4M4.5 11.5l-1.4 1.4m9.8 0l-1.4-1.4M4.5 4.5L3.1 3.1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        <span>설정</span>
+      </a>
+    </nav>
+
+    <div class="sb-card">
+      <div class="sb-card-title">이번 달 사용량</div>
+      <div class="sb-card-bar"><div class="sb-card-fill" style="width:62%"></div></div>
+      <div class="sb-card-meta"><span>AI 추출</span><span>62 / 100</span></div>
+    </div>
+
+    <div class="sb-foot">
+      <div class="sb-avatar">소</div>
+      <div class="sb-user">
+        <div class="sb-user-name">김소라</div>
+        <div class="sb-user-mail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="790a160b18391a18121c0b0057120b">[email&#160;protected]</a></div>
+      </div>
+      <button class="sb-logout" aria-label="로그아웃">
+        <svg viewBox="0 0 16 16" width="14" height="14"><path d="M9 3H3.5A.5.5 0 003 3.5v9a.5.5 0 00.5.5H9M7 8h8m-3-3l3 3-3 3" stroke="currentColor" fill="none" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main main-extract">
+
+    <header class="page-head ex-head">
+      <div>
+        <div class="page-eyebrow">
+          <a href="dashboard.html" class="bc-link">대시보드</a>
+          <span class="bc-sep">›</span>
+          <span>예약 추출</span>
+        </div>
+        <h1 class="page-title">
+          <span class="ai-sparkle ai-sparkle-lg" aria-hidden="true">
+            <svg viewBox="0 0 16 16" width="18" height="18"><path d="M8 1.5l1.4 3.6L13 6.5l-3.6 1.4L8 11.5 6.6 7.9 3 6.5l3.6-1.4L8 1.5zM12.5 11l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8L10 13.5l1.8-.7.7-1.8z" fill="currentColor"/></svg>
+          </span>
+          AI 주문 추출
+        </h1>
+        <p class="page-sub">고객 메시지를 붙여넣으면 주문 정보를 자동으로 정리해드려요.</p>
+      </div>
+    </header>
+
+    <!-- ============ Split workspace ============ -->
+    <section class="split">
+
+      <!-- LEFT: paste panel -->
+      <div class="split-left">
+        <header class="panel-head">
+          <div>
+            <h2 class="panel-title">원본 메시지</h2>
+            <p class="panel-sub">대화 내용을 그대로 복사해 붙여넣어 주세요</p>
+          </div>
+        </header>
+
+        <div class="source-row">
+          <span class="source-label">출처</span>
+          <div class="source-chips">
+            <button class="src-chip is-active" data-src="kakao">
+              <span class="src-dot src-kakao"></span>카카오톡
+            </button>
+            <button class="src-chip" data-src="insta">
+              <span class="src-dot src-insta"></span>인스타그램 DM
+            </button>
+            <button class="src-chip" data-src="naver">
+              <span class="src-dot src-naver"></span>네이버 폼
+            </button>
+            <button class="src-chip" data-src="manual">
+              <span class="src-dot src-manual"></span>직접 입력
+            </button>
+          </div>
+        </div>
+
+        <div class="paste-wrap">
+          <textarea id="paste-input" class="paste-area" placeholder="카카오톡, 인스타그램 DM 내용을 여기에 붙여넣으세요&#10;&#10;예시) 안녕하세요! 다음 주 토요일에 케이크 예약하려고 합니다…">[김지은] 오후 4:32
+안녕하세요 ! 다음 주 토요일에 케이크 예약하려고 합니다 :)
+딸기 생크림 케이크 6호 하나 부탁드리고, 픽업은 오후 3시쯤 가능할까요?
+레터링은 "Happy Birthday Sora" 로 부탁드려요!
+
+[김지은] 오후 4:33
+아 그리고 견과류 알러지가 있어서 혹시 토핑에 견과류 들어가면 빼주시면 감사할게요 ㅠㅠ
+
+[김지은] 오후 4:34
+연락처는 010-1234-5678 이고, 김지은입니다.
+예약금은 얼마 보내드리면 될까요? 계좌도 알려주세요!</textarea>
+
+          <div class="paste-foot">
+            <div class="paste-meta">
+              <span id="char-count">324</span>자 ·
+              <span class="paste-tip">개인정보는 추출 직후 자동 마스킹됩니다.</span>
+            </div>
+            <button class="text-btn" id="clear-btn">
+              <svg viewBox="0 0 16 16" width="12" height="12"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+              비우기
+            </button>
+          </div>
+        </div>
+
+        <button class="btn btn-primary btn-lg extract-cta" id="extract-btn">
+          <span class="ai-sparkle" aria-hidden="true">
+            <svg viewBox="0 0 16 16" width="14" height="14"><path d="M8 1.5l1.4 3.6L13 6.5l-3.6 1.4L8 11.5 6.6 7.9 3 6.5l3.6-1.4L8 1.5zM12.5 11l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8L10 13.5l1.8-.7.7-1.8z" fill="currentColor"/></svg>
+          </span>
+          <span class="cta-label">주문 정보 추출하기</span>
+        </button>
+      </div>
+
+      <!-- RIGHT: result panel -->
+      <div class="split-right">
+        <header class="panel-head">
+          <div>
+            <h2 class="panel-title">추출 결과</h2>
+            <p class="panel-sub" id="result-sub">왼쪽에 메시지를 붙여넣고 추출을 시작해주세요</p>
+          </div>
+          <div class="conf-meter" id="conf-meter" hidden>
+            <div class="conf-circle">
+              <svg viewBox="0 0 36 36" width="36" height="36">
+                <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--color-muted)" stroke-width="3"/>
+                <circle id="conf-arc" cx="18" cy="18" r="15.9" fill="none" stroke="var(--color-primary)" stroke-width="3" stroke-linecap="round" stroke-dasharray="100 100" stroke-dashoffset="13" transform="rotate(-90 18 18)"/>
+              </svg>
+            </div>
+            <div>
+              <div class="conf-val"><span id="conf-pct">87</span>%</div>
+              <div class="conf-lbl">신뢰도</div>
+            </div>
+          </div>
+        </header>
+
+        <!-- Empty state -->
+        <div class="ex-empty" id="empty-state">
+          <div class="empty-art">
+            <svg viewBox="0 0 120 120" width="100" height="100">
+              <rect x="22" y="34" width="76" height="58" rx="6" fill="var(--color-bg)" stroke="var(--color-border)" stroke-width="1"/>
+              <rect x="32" y="46" width="34" height="3" rx="1.5" fill="var(--color-muted)"/>
+              <rect x="32" y="54" width="56" height="3" rx="1.5" fill="var(--color-muted)"/>
+              <rect x="32" y="62" width="40" height="3" rx="1.5" fill="var(--color-muted)"/>
+              <rect x="32" y="74" width="48" height="3" rx="1.5" fill="var(--color-muted)"/>
+              <rect x="32" y="82" width="28" height="3" rx="1.5" fill="var(--color-muted)"/>
+              <!-- sparkle -->
+              <g style="animation: pulseSparkle 2.4s ease-in-out infinite">
+                <path d="M88 22 l1.6 -4 l1.6 4 l4 1.6 l-4 1.6 l-1.6 4 l-1.6 -4 l-4 -1.6 z" fill="var(--color-primary)"/>
+              </g>
+              <path d="M22 102 l1 -2.4 l1 2.4 l2.4 1 l-2.4 1 l-1 2.4 l-1 -2.4 l-2.4 -1 z" fill="var(--color-primary-light)"/>
+            </svg>
+          </div>
+          <h3 class="empty-title">결과가 여기에 표시됩니다</h3>
+          <p class="empty-desc">고객명, 픽업 일시, 케이크 옵션, 금액까지<br/>한 번에 정리해드릴게요.</p>
+          <div class="empty-tags">
+            <span class="opt">고객명</span>
+            <span class="opt">픽업 일시</span>
+            <span class="opt">케이크 옵션</span>
+            <span class="opt">레터링</span>
+            <span class="opt">금액</span>
+          </div>
+        </div>
+
+        <!-- Loading state -->
+        <div class="ex-loading" id="loading-state" hidden>
+          <div class="loader-ring"></div>
+          <h3 class="empty-title">메시지를 읽고 있어요…</h3>
+          <p class="empty-desc">대화의 맥락을 이해하는 데 5초 정도 걸려요.</p>
+          <div class="loader-steps">
+            <div class="ls-step" data-step="1">
+              <span class="ls-dot"></span>대화 분리 및 노이즈 제거
+            </div>
+            <div class="ls-step" data-step="2">
+              <span class="ls-dot"></span>주문 항목과 옵션 식별
+            </div>
+            <div class="ls-step" data-step="3">
+              <span class="ls-dot"></span>날짜·시간 정규화
+            </div>
+            <div class="ls-step" data-step="4">
+              <span class="ls-dot"></span>금액 추정 및 신뢰도 점수 계산
+            </div>
+          </div>
+        </div>
+
+        <!-- Result state -->
+        <div class="ex-result" id="result-state" hidden>
+          <div class="warn-banner" id="warn-banner">
+            <span class="wb-icon">
+              <svg viewBox="0 0 16 16" width="14" height="14"><path d="M8 2l6.5 11.5h-13L8 2z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M8 6.5v3.5M8 11.5v.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </span>
+            <div class="wb-text">
+              <div class="wb-title">일부 정보를 확인해 주세요</div>
+              <div class="wb-desc">2개 항목의 신뢰도가 낮아요. 노란 표시가 있는 칸을 직접 확인해 주세요.</div>
+            </div>
+            <button class="wb-close" aria-label="닫기" onclick="this.parentElement.style.display='none'">
+              <svg viewBox="0 0 16 16" width="12" height="12"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+
+          <div class="ex-fields">
+
+            <div class="field-grid">
+              <label class="ex-field" style="--i:1">
+                <span class="ex-label">고객명</span>
+                <input class="ex-input" value="김지은" />
+                <span class="ex-source">대화에서 발견 · 3회 언급</span>
+              </label>
+              <label class="ex-field" style="--i:2">
+                <span class="ex-label">연락처</span>
+                <input class="ex-input mono" value="010-1234-5678" />
+                <span class="ex-source">대화 본문 명시</span>
+              </label>
+            </div>
+
+            <div class="field-grid">
+              <label class="ex-field" style="--i:3">
+                <span class="ex-label">픽업 날짜</span>
+                <div class="ex-input-icon">
+                  <svg viewBox="0 0 16 16" width="14" height="14"><rect x="2.5" y="3.5" width="11" height="10" rx="1.5" stroke="currentColor" fill="none" stroke-width="1.4"/><path d="M2.5 6.5h11M5.5 2v3M10.5 2v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                  <input class="ex-input mono" value="2026-05-23 (토)" />
+                </div>
+                <span class="ex-source">"다음 주 토요일" 해석됨</span>
+              </label>
+              <label class="ex-field" style="--i:4">
+                <span class="ex-label">픽업 시간</span>
+                <div class="ex-input-icon">
+                  <svg viewBox="0 0 16 16" width="14" height="14"><circle cx="8" cy="8" r="6" stroke="currentColor" fill="none" stroke-width="1.4"/><path d="M8 5v3l2 1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                  <input class="ex-input mono" value="15:00" />
+                </div>
+                <span class="ex-source">"오후 3시쯤"</span>
+              </label>
+            </div>
+
+            <div class="field-grid">
+              <label class="ex-field" style="--i:5">
+                <span class="ex-label">케이크 사이즈</span>
+                <div class="ex-select">
+                  <select>
+                    <option>4호</option>
+                    <option selected>6호</option>
+                    <option>8호</option>
+                  </select>
+                  <svg viewBox="0 0 12 12" width="10" height="10" class="ex-caret"><path d="M3 5l3 3 3-3" stroke="currentColor" fill="none" stroke-width="1.6"/></svg>
+                </div>
+              </label>
+              <label class="ex-field" style="--i:6">
+                <span class="ex-label">맛</span>
+                <div class="ex-select">
+                  <select>
+                    <option selected>딸기 생크림</option>
+                    <option>티라미수</option>
+                    <option>당근 케이크</option>
+                    <option>초콜릿 가나슈</option>
+                    <option>레몬 시폰</option>
+                  </select>
+                  <svg viewBox="0 0 12 12" width="10" height="10" class="ex-caret"><path d="M3 5l3 3 3-3" stroke="currentColor" fill="none" stroke-width="1.6"/></svg>
+                </div>
+              </label>
+            </div>
+
+            <label class="ex-field" style="--i:7">
+              <span class="ex-label">레터링</span>
+              <input class="ex-input" value='Happy Birthday Sora' />
+              <span class="ex-source">따옴표로 묶인 문장 인식</span>
+            </label>
+
+            <label class="ex-field ex-field-wide" style="--i:8">
+              <span class="ex-label">디자인 · 요청사항</span>
+              <textarea class="ex-input ex-textarea" rows="3">견과류 알러지 있음 — 토핑에 견과류 제외</textarea>
+              <span class="ex-source ex-source-warn">
+                <svg viewBox="0 0 12 12" width="10" height="10"><circle cx="6" cy="6" r="5" fill="currentColor" opacity=".25"/><circle cx="6" cy="6" r="2" fill="currentColor"/></svg>
+                알러지 키워드 발견 · 강조 표시 권장
+              </span>
+            </label>
+
+            <div class="field-grid">
+              <label class="ex-field" style="--i:9">
+                <span class="ex-label">주문 금액</span>
+                <div class="ex-input-icon">
+                  <span class="prefix">₩</span>
+                  <input class="ex-input mono" value="68,000" />
+                </div>
+                <span class="ex-source">메뉴판 가격표 기준</span>
+              </label>
+              <label class="ex-field ex-field-low" style="--i:10">
+                <span class="ex-label">
+                  예약금
+                  <span class="conf-tag">확인 필요 · 52%</span>
+                </span>
+                <div class="ex-input-icon">
+                  <span class="prefix">₩</span>
+                  <input class="ex-input mono" placeholder="0" value="20,000" />
+                </div>
+                <span class="ex-source ex-source-warn">
+                  <svg viewBox="0 0 12 12" width="10" height="10"><circle cx="6" cy="6" r="5" fill="currentColor" opacity=".25"/><circle cx="6" cy="6" r="2" fill="currentColor"/></svg>
+                  고객이 문의만 함 · 매장 정책으로 추정
+                </span>
+              </label>
+            </div>
+
+          </div>
+
+          <footer class="ex-actions">
+            <div class="row gap-2">
+              <button class="btn btn-ghost btn-md" id="reextract-btn">
+                <svg viewBox="0 0 16 16" width="13" height="13"><path d="M3 8a5 5 0 1 1 1.3 3.4M3 12V8h4" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                다시 추출
+              </button>
+            </div>
+            <div class="row gap-2">
+              <button class="btn btn-secondary btn-md">초안 저장</button>
+              <button class="btn btn-primary btn-md">
+                예약으로 저장
+                <svg viewBox="0 0 16 16" width="13" height="13"><path d="M3 8l3.5 3.5L13 5" stroke="currentColor" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+          </footer>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  const pasteInput  = document.getElementById('paste-input');
+  const charCount   = document.getElementById('char-count');
+  const clearBtn    = document.getElementById('clear-btn');
+  const extractBtn  = document.getElementById('extract-btn');
+  const reextractBtn = document.getElementById('reextract-btn');
+  const emptyState  = document.getElementById('empty-state');
+  const loadingState = document.getElementById('loading-state');
+  const resultState  = document.getElementById('result-state');
+  const confMeter   = document.getElementById('conf-meter');
+  const confPct     = document.getElementById('conf-pct');
+  const confArc     = document.getElementById('conf-arc');
+  const resultSub   = document.getElementById('result-sub');
+
+  function updateCount() {
+    charCount.textContent = pasteInput.value.length.toLocaleString('ko-KR');
+  }
+  pasteInput.addEventListener('input', updateCount);
+  updateCount();
+
+  clearBtn.addEventListener('click', () => {
+    pasteInput.value = '';
+    updateCount();
+    pasteInput.focus();
+  });
+
+  // source chips
+  document.querySelectorAll('.src-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.src-chip').forEach(c => c.classList.remove('is-active'));
+      chip.classList.add('is-active');
+    });
+  });
+
+  function showState(state) {
+    [emptyState, loadingState, resultState].forEach(el => el.hidden = true);
+    state.hidden = false;
+  }
+
+  function runExtract() {
+    if (!pasteInput.value.trim()) {
+      pasteInput.focus();
+      return;
+    }
+    showState(loadingState);
+    confMeter.hidden = true;
+    resultSub.textContent = '잠시만 기다려 주세요…';
+
+    // animate step indicators
+    const steps = document.querySelectorAll('.ls-step');
+    steps.forEach(s => s.classList.remove('is-done'));
+    steps.forEach((s, i) => {
+      setTimeout(() => s.classList.add('is-done'), 200 + i * 320);
+    });
+
+    setTimeout(() => {
+      showState(resultState);
+      confMeter.hidden = false;
+      // animate confidence arc
+      const pct = 87;
+      confPct.textContent = pct;
+      const circumference = 100; // r=15.9 → ~100 units
+      confArc.style.strokeDashoffset = (100 - pct);
+      resultSub.textContent = '필드를 직접 수정할 수 있어요';
+    }, 1700);
+  }
+
+  extractBtn.addEventListener('click', runExtract);
+  reextractBtn.addEventListener('click', () => {
+    showState(emptyState);
+    confMeter.hidden = true;
+    resultSub.textContent = '왼쪽에 메시지를 붙여넣고 추출을 시작해주세요';
+  });
+
+  // auto-run once on load so the user sees the populated state
+  window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(runExtract, 250);
+  });
+</script>
+
+</body>
+</html>
