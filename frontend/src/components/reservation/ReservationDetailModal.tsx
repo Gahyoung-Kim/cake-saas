@@ -157,7 +157,19 @@ export default function ReservationDetailModal({
                       {r.designNote}
                     </div>
                   )}
-                  {!r.cakeFlavor && !r.cakeSize && !r.lettering && !r.designNote && (
+                  {r.designImage && (
+                    <div>
+                      <div className="text-[11px] font-medium text-ink-muted mb-1.5">디자인 참고 이미지</div>
+                      <a href={r.designImage} target="_blank" rel="noopener noreferrer">
+                        <img
+                          src={r.designImage}
+                          alt="디자인 참고"
+                          className="w-full max-h-56 object-contain rounded-lg border-[0.5px] border-border bg-surface hover:opacity-90 transition-opacity cursor-zoom-in"
+                        />
+                      </a>
+                    </div>
+                  )}
+                  {!r.cakeFlavor && !r.cakeSize && !r.lettering && !r.designNote && !r.designImage && (
                     <span className="text-[13px] text-ink-muted">케이크 정보 없음</span>
                   )}
                 </div>

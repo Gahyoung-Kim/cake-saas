@@ -42,7 +42,7 @@ export default function TodayPickupPage() {
         <div className="max-w-[720px] mx-auto px-5 xl:px-10 py-8">
 
           {/* 헤더 */}
-          <header className="flex items-start justify-between gap-4 mb-6">
+          <header className="flex items-start justify-between gap-4 mb-6 print:mb-4">
             <div>
               <div className="text-caption text-ink-muted mb-1">{TODAY_LABEL}</div>
               <h1 className="text-h1 font-semibold text-ink font-ko">오늘 픽업</h1>
@@ -56,9 +56,25 @@ export default function TodayPickupPage() {
               )}
             </div>
 
+            <div className="flex items-center gap-2 shrink-0">
+              {/* 인쇄 버튼 */}
+              {total > 0 && (
+                <button
+                  onClick={() => window.print()}
+                  className="print:hidden inline-flex items-center gap-1.5 h-9 px-3 text-[13px] rounded-md border-[0.5px] border-border text-ink-sub hover:bg-muted transition-colors"
+                >
+                  <svg viewBox="0 0 16 16" width="14" height="14">
+                    <path d="M4 6V2h8v4M4 11H2V6h12v5h-2M4 9h8v5H4V9z"
+                      stroke="currentColor" fill="none" strokeWidth="1.4" strokeLinejoin="round"/>
+                  </svg>
+                  인쇄
+                </button>
+              )}
+            </div>
+
             {/* 진행바 */}
             {total > 0 && (
-              <div className="flex flex-col items-end gap-1 shrink-0">
+              <div className="flex flex-col items-end gap-1 shrink-0 print:hidden">
                 <span className="text-[11px] text-ink-muted font-num">
                   {doneCount} / {total}
                 </span>

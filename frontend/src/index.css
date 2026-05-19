@@ -99,6 +99,14 @@
   }
 }
 
+/* ── 인쇄 스타일 ── */
+@media print {
+  nav, aside, .print\:hidden { display: none !important; }
+  body { background: white; color: black; }
+  article { break-inside: avoid; page-break-inside: avoid; }
+  @page { margin: 16mm; }
+}
+
 @layer utilities {
   .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); }
   .pt-safe { padding-top: env(safe-area-inset-top, 0px); }

@@ -348,21 +348,31 @@ function TableRow({ reservation: r, onStatusChange, onClick }: RowProps) {
       </div>
 
       {/* 케이크 */}
-      <div className="min-w-0">
-        <div className="text-[13px] text-ink truncate">
-          {[r.cakeFlavor, r.cakeSize].filter(Boolean).join(' · ') || '—'}
-        </div>
-        <div className="flex flex-wrap gap-1 mt-1">
-          {r.lettering && (
-            <span className="text-[11px] px-1.5 py-px rounded-sm bg-muted text-ink-sub truncate max-w-[160px]">
-              "{r.lettering}"
-            </span>
-          )}
-          {r.designNote && (
-            <span className="text-[11px] px-1.5 py-px rounded-sm bg-status-inquiry-bg text-status-inquiry-fg truncate max-w-[140px]">
-              {r.designNote.slice(0, 18)}{r.designNote.length > 18 && '…'}
-            </span>
-          )}
+      <div className="min-w-0 flex items-start gap-2">
+        {r.designImage && (
+          <img
+            src={r.designImage}
+            alt=""
+            onClick={(e) => e.stopPropagation()}
+            className="w-10 h-10 object-cover rounded-md border-[0.5px] border-border shrink-0 cursor-zoom-in hover:opacity-80 transition-opacity"
+          />
+        )}
+        <div className="min-w-0 flex-1">
+          <div className="text-[13px] text-ink truncate">
+            {[r.cakeFlavor, r.cakeSize].filter(Boolean).join(' · ') || '—'}
+          </div>
+          <div className="flex flex-wrap gap-1 mt-1">
+            {r.lettering && (
+              <span className="text-[11px] px-1.5 py-px rounded-sm bg-muted text-ink-sub truncate max-w-[160px]">
+                "{r.lettering}"
+              </span>
+            )}
+            {r.designNote && (
+              <span className="text-[11px] px-1.5 py-px rounded-sm bg-status-inquiry-bg text-status-inquiry-fg truncate max-w-[140px]">
+                {r.designNote.slice(0, 18)}{r.designNote.length > 18 && '…'}
+              </span>
+            )}
+          </div>
         </div>
       </div>
 

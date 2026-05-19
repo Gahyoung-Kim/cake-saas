@@ -82,21 +82,28 @@ export default function ReservationCard({ reservation: r, onStatusChange, onClic
       </div>
 
       {/* Row 3: 케이크 정보 */}
-      <div className="flex flex-wrap gap-1.5">
-        {r.cakeFlavor && (
-          <Chip>{r.cakeFlavor}</Chip>
+      <div className="flex gap-3 items-start">
+        {/* 디자인 이미지 썸네일 */}
+        {r.designImage && (
+          <img
+            src={r.designImage}
+            alt="디자인 참고"
+            onClick={(e) => e.stopPropagation()}
+            className="w-14 h-14 object-cover rounded-lg border-[0.5px] border-border shrink-0 cursor-zoom-in"
+          />
         )}
-        {r.cakeSize && (
-          <Chip>{r.cakeSize}</Chip>
-        )}
-        {r.lettering && (
-          <Chip className="max-w-[180px] truncate">"{r.lettering}"</Chip>
-        )}
-        {r.designNote && (
-          <Chip className="text-status-inquiry-fg bg-status-inquiry-bg border-status-inquiry-fg/20">
-            {r.designNote.length > 20 ? r.designNote.slice(0, 20) + '…' : r.designNote}
-          </Chip>
-        )}
+        <div className="flex flex-wrap gap-1.5 flex-1">
+          {r.cakeFlavor && <Chip>{r.cakeFlavor}</Chip>}
+          {r.cakeSize   && <Chip>{r.cakeSize}</Chip>}
+          {r.lettering  && (
+            <Chip className="max-w-[180px] truncate">"{r.lettering}"</Chip>
+          )}
+          {r.designNote && (
+            <Chip className="text-status-inquiry-fg bg-status-inquiry-bg border-status-inquiry-fg/20">
+              {r.designNote.length > 20 ? r.designNote.slice(0, 20) + '…' : r.designNote}
+            </Chip>
+          )}
+        </div>
       </div>
 
       {/* Row 4: 금액 + 입금 */}

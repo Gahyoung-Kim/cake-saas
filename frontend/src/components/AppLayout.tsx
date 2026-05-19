@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '../store/authStore';
+import { reservationApi } from '../api/reservation';
 
 // ── 데스크탑 사이드바 전체 ───────────────────────────────────────────────
 
@@ -75,6 +77,15 @@ export default function AppLayout({ children }: Props) {
   const { user, logout } = useAuthStore();
   const [moreOpen, setMoreOpen] = useState(false);
 
+  // 대기중 예약 카운트 (문의 + 확정)
+  const { data: stats } = useQuery({
+    queryKey: ['dashboard-stats'],
+    queryFn:  () => reservationApi.dashboardStats(),
+    staleTime: 1000 * 60,
+    refetchInterval: 1000 * 60 * 5, // 5분마다 갱신
+  });
+  const pendingCount = stats?.pendingCount ?? 0;
+
   // 더보기 항목 중 하나가 활성 상태면 더보기 탭을 활성으로 표시
   const moreActive = MORE_ITEMS.some((m) => location.pathname.startsWith(m.to));
 
@@ -111,6 +122,12 @@ export default function AppLayout({ children }: Props) {
                   {badge}
                 </span>
               )}
+              {/* 대기중 카운트 뱃지 — 예약 목록 항목에만 */}
+              {to === '/reservations' && pendingCount > 0 && (
+                <span className="ml-auto text-[10px] font-bold px-[6px] py-[2px] rounded-full bg-warning text-bg leading-none">
+                  {pendingCount}
+                </span>
+              )}
             </NavLink>
           ))}
         </nav>
@@ -145,12 +162,19 @@ export default function AppLayout({ children }: Props) {
         {MOBILE_TABS.map(({ to, label, end }) => (
           <NavLink key={to} to={to} end={end}
             className={({ isActive }) =>
-              `flex flex-col items-center justify-center gap-[3px] transition-colors ${
+              `flex flex-col items-center justify-center gap-[3px] transition-colors relative ${
                 isActive ? 'text-primary' : 'text-ink-muted'
               }`
             }
           >
-            {TAB_ICONS[to]}
+            <span className="relative">
+              {TAB_ICONS[to]}
+              {to === '/reservations' && pendingCount > 0 && (
+                <span className="absolute -top-1 -right-1.5 min-w-[14px] h-[14px] flex items-center justify-center text-[9px] font-bold rounded-full bg-warning text-bg px-[3px] leading-none">
+                  {pendingCount > 99 ? '99+' : pendingCount}
+                </span>
+              )}
+            </span>
             <span className="text-[10px] font-medium leading-none">{label}</span>
           </NavLink>
         ))}
