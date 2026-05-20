@@ -66,7 +66,8 @@ function reservationToForm(r: Reservation): ReservationFormData {
 
 interface Props {
   mode: 'create' | 'edit';
-  reservation?: Reservation;  // edit 모드에서 pre-fill용
+  reservation?: Reservation;     // edit 모드에서 pre-fill용
+  initialPickupDate?: string;    // create 모드에서 날짜 미리 채우기
   open: boolean;
   onClose: () => void;
   onSuccess: (saved: Reservation) => void;
@@ -74,7 +75,7 @@ interface Props {
 
 // ── Component ─────────────────────────────────────────────────────────────
 
-export default function ReservationFormModal({ mode, reservation, open, onClose, onSuccess }: Props) {
+export default function ReservationFormModal({ mode, reservation, initialPickupDate, open, onClose, onSuccess }: Props) {
   const qc = useQueryClient();
   const [form,         setForm]         = useState<ReservationFormData>(emptyForm);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -92,10 +93,12 @@ export default function ReservationFormModal({ mode, reservation, open, onClose,
   // open 될 때마다 폼 초기화
   useEffect(() => {
     if (!open) return;
-    const next = mode === 'edit' && reservation ? reservationToForm(reservation) : emptyForm();
+    const next = mode === 'edit' && reservation
+      ? reservationToForm(reservation)
+      : { ...emptyForm(), pickupDate: initialPickupDate ?? '' };
     setForm(next);
     setImagePreview(next.designImage || null);
-  }, [open, mode, reservation]);
+  }, [open, mode, reservation, initialPickupDate]);
 
   const mutation = useMutation({
     mutationFn: () => {

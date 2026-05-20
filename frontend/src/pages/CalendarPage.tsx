@@ -9,6 +9,7 @@ import type { Reservation, ReservationStatus } from '../api/reservation';
 import AppLayout from '../components/AppLayout';
 import CalendarGrid from '../components/calendar/CalendarGrid';
 import ReservationDetailModal from '../components/reservation/ReservationDetailModal';
+import ReservationFormModal from '../components/reservation/ReservationFormModal';
 
 dayjs.locale('ko');
 
@@ -32,6 +33,7 @@ export default function CalendarPage() {
   const [current,      setCurrent]      = useState(dayjs());
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [detailModal,  setDetailModal]  = useState<Reservation | null>(null);
+  const [formModal,    setFormModal]    = useState<{ pickupDate: string } | null>(null);
 
   // ── 캘린더 데이터 ──
   const { data: calData, isLoading: calLoading } = useQuery({
@@ -180,16 +182,30 @@ export default function CalendarPage() {
                         : '로딩 중…'}
                     </p>
                   </div>
-                  <button
-                    onClick={() => setSelectedDate(null)}
-                    className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-muted text-ink-muted transition-colors shrink-0"
-                    aria-label="닫기"
-                  >
-                    <svg viewBox="0 0 16 16" width="14" height="14">
-                      <path d="M4 4l8 8M12 4l-8 8"
-                        stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-                    </svg>
-                  </button>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    {/* 예약 추가 단축 버튼 */}
+                    {selectedDate && (
+                      <button
+                        onClick={() => setFormModal({ pickupDate: selectedDate })}
+                        className="inline-flex items-center gap-1 h-8 px-2.5 text-[12px] font-medium rounded-md bg-primary text-bg hover:bg-primary-dark transition-colors"
+                      >
+                        <svg viewBox="0 0 12 12" width="10" height="10">
+                          <path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                        </svg>
+                        예약
+                      </button>
+                    )}
+                    <button
+                      onClick={() => setSelectedDate(null)}
+                      className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-muted text-ink-muted transition-colors"
+                      aria-label="닫기"
+                    >
+                      <svg viewBox="0 0 16 16" width="14" height="14">
+                        <path d="M4 4l8 8M12 4l-8 8"
+                          stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
 
                 {/* 패널 본문 */}
@@ -227,6 +243,20 @@ export default function CalendarPage() {
           onStatusChange={(id, status) => statusMutation.mutate({ id, status })}
           onDepositChange={(id, paid) => depositMutation.mutate({ id, paid })}
           isLoading={statusMutation.isPending || depositMutation.isPending}
+        />
+
+        {/* ── 날짜 클릭 → 예약 등록 단축 ── */}
+        <ReservationFormModal
+          mode="create"
+          initialPickupDate={formModal?.pickupDate}
+          open={!!formModal}
+          onClose={() => setFormModal(null)}
+          onSuccess={(saved) => {
+            qc.invalidateQueries({ queryKey: ['calendar-v2'] });
+            qc.invalidateQueries({ queryKey: ['reservations-by-date', formModal?.pickupDate] });
+            toast.success(`${saved.customerName} 예약이 등록됐습니다.`);
+            setFormModal(null);
+          }}
         />
       </div>
     </AppLayout>

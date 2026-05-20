@@ -69,6 +69,26 @@ export default function ReservationListPage() {
   // ── 등록/수정 폼 모달 상태 ──
   const [formModal, setFormModal] = useState<{ mode: 'create' | 'edit'; reservation?: Reservation } | null>(null);
 
+  // ── CSV 내보내기 ──
+  const [exporting, setExporting] = useState(false);
+
+  async function handleExport() {
+    setExporting(true);
+    try {
+      // 현재 필터 기준으로 전체 목록 조회 (최대 10,000건)
+      const all = await reservationApi.list({
+        status: tab === 'all' ? undefined : tab,
+        search: search.trim() || undefined,
+        perPage: 10000,
+      });
+      downloadCsv(all.items, tab === 'all' ? '전체' : STATUS_CONFIG[tab as ReservationStatus]?.label ?? tab);
+    } catch {
+      toast.error('내보내기에 실패했습니다.');
+    } finally {
+      setExporting(false);
+    }
+  }
+
   // ── 상태 변경 (목록 인라인 + 모달) ──
   const statusMutation = useMutation({
     mutationFn: ({ id, status }: { id: number; status: ReservationStatus }) =>
@@ -138,6 +158,23 @@ export default function ReservationListPage() {
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
+              {/* CSV 내보내기 */}
+              {total > 0 && (
+                <button
+                  onClick={handleExport}
+                  disabled={exporting}
+                  className="hidden sm:inline-flex items-center gap-1.5 h-9 px-3 text-[13px] rounded-md border-[0.5px] border-border text-ink-sub hover:bg-muted disabled:opacity-50 transition-colors"
+                >
+                  {exporting ? (
+                    <span className="w-3.5 h-3.5 border-2 border-border border-t-ink-sub rounded-full animate-spin" />
+                  ) : (
+                    <svg viewBox="0 0 14 14" width="13" height="13">
+                      <path d="M7 1v8M4 6l3 3 3-3M2 11h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  )}
+                  CSV
+                </button>
+              )}
               {/* 예약 등록 버튼 */}
               <button
                 onClick={() => setFormModal({ mode: 'create' })}
@@ -520,4 +557,51 @@ function EmptyState({ tab, search }: { tab: string; search: string }) {
       </p>
     </div>
   );
+}
+
+// ── CSV 유틸 ─────────────────────────────────────────────────────────────
+
+const STATUS_LABEL: Record<string, string> = {
+  inquiry: '문의', confirmed: '확정', making: '제작중', done: '완료', cancelled: '취소',
+};
+
+function escapeCsv(v: string | number | null | undefined): string {
+  if (v == null) return '';
+  const s = String(v);
+  return s.includes(',') || s.includes('"') || s.includes('\n')
+    ? `"${s.replace(/"/g, '""')}"`
+    : s;
+}
+
+function downloadCsv(items: Reservation[], label: string) {
+  const HEADERS = ['픽업날짜', '픽업시간', '고객명', '연락처', '케이크맛', '케이크크기',
+    '레터링', '디자인요청', '금액', '예약금', '입금여부', '상태', '등록일'];
+
+  const rows = items.map((r) => [
+    r.pickupDate,
+    r.pickupTime ?? '',
+    r.customerName,
+    r.customerPhone ?? '',
+    r.cakeFlavor ?? '',
+    r.cakeSize ?? '',
+    r.lettering ?? '',
+    r.designNote ?? '',
+    r.price,
+    r.deposit,
+    r.depositPaid ? '완료' : '미입금',
+    STATUS_LABEL[r.status] ?? r.status,
+    r.createdAt.slice(0, 10),
+  ].map(escapeCsv).join(','));
+
+  // BOM 추가 → 한글 깨짐 방지 (Excel)
+  const bom = '﻿';
+  const csv = bom + [HEADERS.join(','), ...rows].join('\r\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  const date = new Date().toISOString().slice(0, 10);
+  a.href     = url;
+  a.download = `caker_예약_${label}_${date}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
 }
