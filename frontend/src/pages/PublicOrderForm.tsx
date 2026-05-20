@@ -223,8 +223,9 @@ export default function PublicOrderForm() {
 
         {/* 케이크 옵션 */}
         <Fieldset legend="케이크 옵션">
-          {data.sizeOptions.length > 0 && (
-            <Field label="사이즈" required>
+          {/* 사이즈: 옵션 있으면 버튼 선택, 없으면 자유 입력 */}
+          <Field label="사이즈" required>
+            {data.sizeOptions.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {data.sizeOptions.map((s) => (
                   <button key={s.label} type="button" onClick={() => update('cakeSize', s.label)}
@@ -235,16 +236,23 @@ export default function PublicOrderForm() {
                     }`}
                   >
                     {s.label}
-                    {s.price > 0 && <span className={`ml-1.5 ${form.cakeSize === s.label ? 'opacity-70' : 'text-ink-muted'}`}>
-                      ₩{s.price.toLocaleString()}
-                    </span>}
+                    {s.price > 0 && (
+                      <span className={`ml-1.5 ${form.cakeSize === s.label ? 'opacity-70' : 'text-ink-muted'}`}>
+                        ₩{s.price.toLocaleString()}
+                      </span>
+                    )}
                   </button>
                 ))}
               </div>
-            </Field>
-          )}
-          {data.flavorOptions.length > 0 && (
-            <Field label="맛">
+            ) : (
+              <input type="text" value={form.cakeSize} onChange={(e) => update('cakeSize', e.target.value)}
+                placeholder="예) 4호, 6호, 8호" className={INPUT_CLS} required />
+            )}
+          </Field>
+
+          {/* 맛: 옵션 있으면 버튼 선택, 없으면 자유 입력 */}
+          <Field label="맛">
+            {data.flavorOptions.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {data.flavorOptions.map((f) => (
                   <button key={f.label} type="button" onClick={() => update('cakeFlavor', f.label)}
@@ -258,8 +266,11 @@ export default function PublicOrderForm() {
                   </button>
                 ))}
               </div>
-            </Field>
-          )}
+            ) : (
+              <input type="text" value={form.cakeFlavor} onChange={(e) => update('cakeFlavor', e.target.value)}
+                placeholder="예) 딸기 생크림, 초콜릿" className={INPUT_CLS} />
+            )}
+          </Field>
         </Fieldset>
 
         {/* 레터링 & 요청 */}

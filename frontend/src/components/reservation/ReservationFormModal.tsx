@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import dayjs from 'dayjs';
 import { reservationApi } from '../../api/reservation';
 import type { Reservation, ReservationFormData, ReservationStatus } from '../../api/reservation';
+import { apiFetch } from '../../api/client';
 
 dayjs.locale('ko');
 
@@ -78,6 +79,15 @@ export default function ReservationFormModal({ mode, reservation, open, onClose,
   const [form,         setForm]         = useState<ReservationFormData>(emptyForm);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [uploading,    setUploading]    = useState(false);
+
+  // 샵 사이즈·맛 옵션 (힌트 칩용)
+  const { data: shopData } = useQuery({
+    queryKey: ['shop'],
+    queryFn: () => apiFetch<{ sizeOptions: { label: string; price: number }[]; flavorOptions: { label: string }[] }>('/api/shop'),
+    staleTime: 1000 * 60 * 5,
+  });
+  const sizeHints   = shopData?.sizeOptions   ?? [];
+  const flavorHints = shopData?.flavorOptions ?? [];
 
   // open 될 때마다 폼 초기화
   useEffect(() => {
@@ -247,9 +257,43 @@ export default function ReservationFormModal({ mode, reservation, open, onClose,
                 <div className="grid grid-cols-2 gap-3">
                   <Field label="사이즈">
                     <Input value={form.cakeSize ?? ''} onChange={(v) => set('cakeSize', v)} placeholder="예) 6호" />
+                    {sizeHints.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-1.5">
+                        {sizeHints.map((s) => (
+                          <button
+                            key={s.label} type="button"
+                            onClick={() => set('cakeSize', s.label)}
+                            className={`text-[11px] px-2 py-0.5 rounded-full border-[0.5px] transition-colors ${
+                              form.cakeSize === s.label
+                                ? 'border-primary bg-primary-light text-primary-dark'
+                                : 'border-border text-ink-muted hover:border-border-strong'
+                            }`}
+                          >
+                            {s.label}{s.price > 0 && ` ₩${s.price.toLocaleString()}`}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </Field>
                   <Field label="맛">
                     <Input value={form.cakeFlavor ?? ''} onChange={(v) => set('cakeFlavor', v)} placeholder="예) 딸기 생크림" />
+                    {flavorHints.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-1.5">
+                        {flavorHints.map((f) => (
+                          <button
+                            key={f.label} type="button"
+                            onClick={() => set('cakeFlavor', f.label)}
+                            className={`text-[11px] px-2 py-0.5 rounded-full border-[0.5px] transition-colors ${
+                              form.cakeFlavor === f.label
+                                ? 'border-primary bg-primary-light text-primary-dark'
+                                : 'border-border text-ink-muted hover:border-border-strong'
+                            }`}
+                          >
+                            {f.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </Field>
                 </div>
                 <Field label="레터링 문구">

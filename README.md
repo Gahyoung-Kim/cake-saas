@@ -55,20 +55,25 @@ CREATE DATABASE cakesaas CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ### 3. 백엔드 실행
 
 ```bash
+# 프로젝트 루트(cake-saas/)에서 실행
 cd backend
 python -m venv venv
 
-# Windows
-venv\Scripts\pip install -r requirements.txt
-venv\Scripts\alembic upgrade head
-venv\Scripts\uvicorn backend.main:app --reload
+# Windows (프로젝트 루트에서)
+backend\venv\Scripts\pip install -r backend\requirements.txt
+backend\venv\Scripts\alembic -c backend\alembic.ini upgrade head
+backend\venv\Scripts\uvicorn backend.main:app --reload
 
-# macOS / Linux
-source venv/bin/activate
-pip install -r requirements.txt
-alembic upgrade head
+# macOS / Linux (프로젝트 루트에서)
+python -m venv backend/venv
+source backend/venv/bin/activate
+pip install -r backend/requirements.txt
+alembic -c backend/alembic.ini upgrade head
 uvicorn backend.main:app --reload
 ```
+
+> ⚠️ uvicorn은 반드시 프로젝트 루트(`cake-saas/`)에서 실행해야 합니다.  
+> `backend/` 디렉터리 안에서 실행하면 패키지 경로 오류가 발생합니다.
 
 서버: http://localhost:8000  
 API 문서: http://localhost:8000/docs

@@ -19,6 +19,10 @@ __pycache__/
 *.pyc
 *.py[cod]
 
+# 업로드 이미지 파일 (디렉터리 구조만 git에 유지)
+backend/uploads/*
+!backend/uploads/.gitkeep
+
 # =========================
 # Logs
 # =========================
