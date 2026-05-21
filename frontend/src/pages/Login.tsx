@@ -13,7 +13,7 @@ export default function Login() {
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [shopName, setShopName] = useState('');
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault();
     setLoading(true);
     try {
@@ -76,6 +76,7 @@ export default function Login() {
               <span className="text-caption font-medium text-ink-sub">이메일</span>
               <input
                 type="email"
+                autoComplete="email"
                 className="bg-bg border-[0.5px] border-border rounded-md px-3 h-[38px] text-[13px] text-ink outline-none transition-[border-color,box-shadow] duration-200 placeholder:text-ink-muted hover:border-border-strong focus:border-primary focus:shadow-[0_0_0_3px_rgba(200,145,122,0.18)]"
                 placeholder="owner@example.com"
                 value={email}
@@ -87,6 +88,7 @@ export default function Login() {
               <span className="text-caption font-medium text-ink-sub">비밀번호</span>
               <input
                 type="password"
+                autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
                 className="bg-bg border-[0.5px] border-border rounded-md px-3 h-[38px] text-[13px] text-ink outline-none transition-[border-color,box-shadow] duration-200 placeholder:text-ink-muted hover:border-border-strong focus:border-primary focus:shadow-[0_0_0_3px_rgba(200,145,122,0.18)]"
                 placeholder="••••••••"
                 value={password}
