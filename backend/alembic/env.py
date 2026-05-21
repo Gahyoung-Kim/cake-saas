@@ -4,13 +4,16 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config, pool
 from alembic import context
 
-# /app(Docker) 또는 backend/(로컬) 를 경로에 추가
-# alembic/ 의 한 단계 위 = backend 디렉터리
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+# 경로 계산:
+#   __file__ = /app/backend/alembic/env.py  (Docker)
+#            = c:\kkh\cake_saas\backend\alembic\env.py  (로컬)
+# '../..' → /app  (Docker) 또는 c:\kkh\cake_saas (로컬)
+# 'backend' 패키지가 올바른 패키지로 인식되어 상대 임포트 작동
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 
-from config import settings    # noqa: E402
-from database import Base      # noqa: E402
-import models                  # noqa: E402, F401  — metadata 등록용
+from backend.config import settings    # noqa: E402
+from backend.database import Base      # noqa: E402
+import backend.models                  # noqa: E402, F401  — metadata 등록용
 
 config = context.config
 config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)

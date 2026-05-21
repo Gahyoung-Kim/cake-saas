@@ -8,7 +8,9 @@
 - Frontend: React 19 + TypeScript + Vite + Zustand + TanStack Query + Tailwind CSS
 - Backend: Python + FastAPI + SQLAlchemy + Alembic + MySQL
 - Auth: JWT (python-jose, bcrypt)
-- AI: Anthropic Claude API (claude-sonnet-4-20250514) — OpenAI 사용 안 함
+- AI: OpenAI API (gpt-4o-mini) 기반 주문 추출
+- Anthropic Claude API 키는 추후 전환 가능성을 위해 보관할 수 있음
+
 - 날짜: dayjs + locale ko
 - 알림: react-hot-toast
 - 애니메이션: Framer Motion
@@ -65,12 +67,13 @@ inquiry → confirmed → making → done / cancelled
 
 ## AI 추출 엔드포인트
 POST /api/extract  →  { chat_text } → 주문 정보 JSON + confidence
-모델: claude-sonnet-4-20250514 (고정)
+모델: gpt-4o-mini (기본)
 
 ## 절대 하지 말 것
 - 한국어 날짜를 영어로 표시하지 말 것
 - 환경변수를 코드에 하드코딩하지 말 것
 - npm 또는 yarn 사용 금지 (반드시 pnpm)
 - any 타입 사용 금지
-- OpenAI API 사용 금지 (Anthropic API만 사용)
+- 기본 AI 추출은 OpenAI gpt-4o-mini 기준으로 작업
+- 사용자가 별도로 요청하기 전까지 Claude API로 전환하지 않기
 - Fabric.js 사용 금지 (Phase 2 캔버스는 Konva.js 예정)
