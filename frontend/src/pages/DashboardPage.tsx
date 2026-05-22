@@ -178,7 +178,7 @@ export default function DashboardPage() {
                 {[1, 2, 3].map((i) => <div key={i} className="skeleton h-[110px] rounded-lg" />)}
               </div>
             ) : recentItems.length === 0 ? (
-              <EmptyRecent onExtract={() => navigate('/extract')} />
+              <EmptyRecent onExtract={() => navigate('/extract')} onSetupForm={() => navigate('/order-form')} />
             ) : (
               <div className="flex flex-col gap-3">
                 {recentItems.map((r) => (
@@ -305,7 +305,7 @@ function QuickAction({ label, desc, icon, onClick, primary }: {
   );
 }
 
-function EmptyRecent({ onExtract }: { onExtract: () => void }) {
+function EmptyRecent({ onExtract, onSetupForm }: { onExtract: () => void; onSetupForm: () => void }) {
   return (
     <div className="flex flex-col items-center gap-4 py-12 text-center bg-surface rounded-xl border-[0.5px] border-border">
       <svg viewBox="0 0 120 80" width="100" height="66">
@@ -317,17 +317,29 @@ function EmptyRecent({ onExtract }: { onExtract: () => void }) {
       </svg>
       <div>
         <p className="text-[14px] font-medium text-ink">아직 예약이 없어요</p>
-        <p className="text-caption text-ink-muted mt-1">AI로 채팅을 분석해 첫 예약을 만들어보세요.</p>
+        <p className="text-caption text-ink-muted mt-1">고객 주문서를 먼저 만들거나 AI로 채팅을 분석해보세요.</p>
       </div>
-      <button
-        onClick={onExtract}
-        className="inline-flex items-center gap-1.5 h-9 px-4 text-[13px] rounded-md font-medium bg-primary text-bg hover:bg-primary-dark transition-colors"
-      >
-        <svg viewBox="0 0 16 16" width="12" height="12">
-          <path d="M8 1.5l1.4 3.6L13 6.5l-3.6 1.4L8 11.5 6.6 7.9 3 6.5l3.6-1.4L8 1.5z" fill="currentColor" />
-        </svg>
-        AI로 주문 추출
-      </button>
+      <div className="flex items-center gap-2 flex-wrap justify-center">
+        <button
+          onClick={onSetupForm}
+          className="inline-flex items-center gap-1.5 h-9 px-4 text-[13px] rounded-md font-medium border-[0.5px] border-border-strong text-ink-sub hover:bg-muted transition-colors"
+        >
+          <svg viewBox="0 0 16 16" width="12" height="12">
+            <rect x="2" y="3" width="12" height="11" rx="1.5" stroke="currentColor" fill="none" strokeWidth="1.4"/>
+            <path d="M5 6h6M5 9h6M5 12h3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+          </svg>
+          주문서 템플릿 만들기
+        </button>
+        <button
+          onClick={onExtract}
+          className="inline-flex items-center gap-1.5 h-9 px-4 text-[13px] rounded-md font-medium bg-primary text-bg hover:bg-primary-dark transition-colors"
+        >
+          <svg viewBox="0 0 16 16" width="12" height="12">
+            <path d="M8 1.5l1.4 3.6L13 6.5l-3.6 1.4L8 11.5 6.6 7.9 3 6.5l3.6-1.4L8 1.5z" fill="currentColor" />
+          </svg>
+          AI로 주문 추출
+        </button>
+      </div>
     </div>
   );
 }

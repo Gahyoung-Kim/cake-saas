@@ -13,6 +13,7 @@ class FormConfig(Base):
     flavor_options: Mapped[list | None] = mapped_column(JSON)
     cancellation_policy: Mapped[str | None] = mapped_column(Text)
     slug: Mapped[str | None] = mapped_column(String(100), unique=True)
+    config_json: Mapped[str | None] = mapped_column(Text)   # 전체 formConfig JSON
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
     )
