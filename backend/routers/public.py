@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from ..database import get_db
 from ..models.order import Order, OrderStatus
 from ..models.form_config import FormConfig
-from ..schemas.shop import PublicShopResponse, PublicOrderCreate, SizeOption, FlavorOption
+from ..schemas.shop import PublicShopResponse, PublicOrderCreate, SizeOption, FlavorOption, parse_form_config
 
 router = APIRouter()
 
@@ -25,6 +25,7 @@ def get_public_form(slug: str, db: Annotated[Session, Depends(get_db)]):
         cancellation_policy=config.cancellation_policy,
         size_options=[SizeOption(**s) for s in (config.size_options or [])],
         flavor_options=[FlavorOption(**f) for f in (config.flavor_options or [])],
+        form_config=parse_form_config(config.config_json),
     )
 
 

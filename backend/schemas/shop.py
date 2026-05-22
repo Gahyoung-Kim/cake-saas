@@ -44,6 +44,11 @@ class FormPickup(CamelModel):
     store_notes: str | None = None   # 매장 픽업 준수사항
 
 
+class OperatingHours(CamelModel):
+    start: str = '10:00'   # "HH:MM"
+    end:   str = '19:00'   # "HH:MM"
+
+
 class FormConfig(CamelModel):
     sizes:               list[FormSize]        = []
     flavors:             list[FormFlavor]      = []
@@ -51,6 +56,8 @@ class FormConfig(CamelModel):
     extra_options:       list[FormExtraOption] = []
     pickup:              FormPickup            = FormPickup()
     cancellation_policy: str                   = ''
+    operating_hours:     OperatingHours | None = None
+    kakao_channel_url:   str | None            = None
 
 
 # ── ShopUpdate / ShopResponse ─────────────────────────────────────────────

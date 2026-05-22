@@ -10,10 +10,8 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 5173,
       proxy: {
-        '/api': {
-          target: apiUrl,
-          changeOrigin: true,
-        },
+        '/api': { target: apiUrl, changeOrigin: true },
+        '/uploads': { target: apiUrl, changeOrigin: true },  // 업로드 이미지 서빙
       },
     },
   };

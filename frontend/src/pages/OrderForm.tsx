@@ -11,6 +11,7 @@ interface FormFlavor      { label: string; extraPrice: number; }
 interface FormDesignTier  { name: string; description: string; extraPrice: number; }
 interface FormExtraOption { label: string; price: number; }
 interface FormPickup      { type: 'store' | 'quick'; deliveryFee: number | null; deliveryArea: string | null; storeNotes: string | null; }
+interface OperatingHours  { start: string; end: string; }
 
 interface FormConfig {
   sizes:               FormSize[];
@@ -19,6 +20,8 @@ interface FormConfig {
   extraOptions:        FormExtraOption[];
   pickup:              FormPickup;
   cancellationPolicy:  string;
+  operatingHours:      OperatingHours | null;
+  kakaoChannelUrl:     string | null;
 }
 
 interface ShopData { slug: string | null; formConfig: FormConfig | null; }
@@ -46,6 +49,8 @@ const DEFAULT: FormConfig = {
     { label: '포토 이미지 인쇄', price: 5000 },
   ],
   pickup: { type: 'store', deliveryFee: null, deliveryArea: null, storeNotes: null },
+  operatingHours: { start: '10:00', end: '19:00' },
+  kakaoChannelUrl: null,
   cancellationPolicy:
     '픽업 7일 전 취소: 전액 환불\n픽업 3~6일 전 취소: 예약금 50% 환불\n픽업 1~2일 전 취소: 환불 불가\n제작 착수 후 취소: 환불 불가\n※ 단순 변심으로 인한 변경은 픽업 5일 전까지 가능합니다.',
 };
@@ -118,12 +123,14 @@ export default function OrderForm() {
 
           {isLoading ? <LoadingSkeleton /> : (
             <>
-              <SizeSection    sizes={cfg.sizes}            onChange={v => set('sizes', v)} />
-              <FlavorSection  flavors={cfg.flavors}         onChange={v => set('flavors', v)} />
-              <TierSection    tiers={cfg.designTiers}       onChange={v => set('designTiers', v)} />
-              <ExtraSection   options={cfg.extraOptions}    onChange={v => set('extraOptions', v)} />
-              <PickupSection  pickup={cfg.pickup}           onChange={v => set('pickup', v)} />
-              <PolicySection  policy={cfg.cancellationPolicy} onChange={v => set('cancellationPolicy', v)} />
+              <SizeSection      sizes={cfg.sizes}              onChange={v => set('sizes', v)} />
+              <FlavorSection    flavors={cfg.flavors}           onChange={v => set('flavors', v)} />
+              <TierSection      tiers={cfg.designTiers}         onChange={v => set('designTiers', v)} />
+              <ExtraSection     options={cfg.extraOptions}      onChange={v => set('extraOptions', v)} />
+              <PickupSection    pickup={cfg.pickup}             onChange={v => set('pickup', v)} />
+              <OperatingSection hours={cfg.operatingHours}      onChange={v => set('operatingHours', v)} />
+              <KakaoSection     url={cfg.kakaoChannelUrl}       onChange={v => set('kakaoChannelUrl', v)} />
+              <PolicySection    policy={cfg.cancellationPolicy} onChange={v => set('cancellationPolicy', v)} />
             </>
           )}
 
@@ -325,7 +332,61 @@ function PickupSection({ pickup, onChange }: { pickup: FormPickup; onChange: (v:
   );
 }
 
-// ── 섹션 6: 취소·환불 규정 ────────────────────────────────────────────────
+// ── 섹션 6: 영업시간 ─────────────────────────────────────────────────────
+
+function OperatingSection({
+  hours, onChange,
+}: {
+  hours: OperatingHours | null;
+  onChange: (v: OperatingHours | null) => void;
+}) {
+  const h = hours ?? { start: '10:00', end: '19:00' };
+  return (
+    <SectionShell title="영업시간" desc="고객 주문서에서 픽업 가능 시간 범위로 사용됩니다.">
+      <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex flex-col gap-1.5 flex-1 min-w-[120px]">
+          <span className="text-[12px] font-medium text-ink-sub">시작 시간</span>
+          <input type="time" value={h.start}
+            onChange={e => onChange({ ...h, start: e.target.value })}
+            className={INPUT_CLS} />
+        </div>
+        <span className="text-ink-muted mt-5">~</span>
+        <div className="flex flex-col gap-1.5 flex-1 min-w-[120px]">
+          <span className="text-[12px] font-medium text-ink-sub">마감 시간</span>
+          <input type="time" value={h.end}
+            onChange={e => onChange({ ...h, end: e.target.value })}
+            className={INPUT_CLS} />
+        </div>
+      </div>
+      <p className="text-[11px] text-ink-muted mt-2">
+        고객이 픽업 시간 선택 시 10분 단위로 이 범위 내에서만 선택할 수 있습니다.
+      </p>
+    </SectionShell>
+  );
+}
+
+// ── 섹션 7: 카카오톡 채널 ────────────────────────────────────────────────
+
+function KakaoSection({ url, onChange }: { url: string | null; onChange: (v: string | null) => void }) {
+  return (
+    <SectionShell title="카카오톡 채널" desc="공개 주문서 하단에 상담 버튼으로 표시됩니다.">
+      <div className="flex flex-col gap-1.5">
+        <span className="text-[12px] font-medium text-ink-sub">카카오톡 채널 URL</span>
+        <input
+          value={url ?? ''}
+          onChange={e => onChange(e.target.value || null)}
+          placeholder="예) https://pf.kakao.com/_xxxxx"
+          className={INPUT_CLS}
+        />
+        <p className="text-[11px] text-ink-muted">
+          카카오 채널 링크를 입력하면 고객 주문서에 "카카오톡 상담" 버튼이 표시됩니다.
+        </p>
+      </div>
+    </SectionShell>
+  );
+}
+
+// ── 섹션 8: 취소·환불 규정 ────────────────────────────────────────────────
 
 function PolicySection({ policy, onChange }: { policy: string; onChange: (v: string) => void }) {
   return (
