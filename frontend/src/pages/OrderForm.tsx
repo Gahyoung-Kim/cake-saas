@@ -10,7 +10,7 @@ interface FormSize        { label: string; price: number; }
 interface FormFlavor      { label: string; extraPrice: number; }
 interface FormDesignTier  { name: string; description: string; extraPrice: number; }
 interface FormExtraOption { label: string; price: number; }
-interface FormPickup      { type: 'store' | 'quick' | 'both'; deliveryFee: number | null; deliveryArea: string | null; }
+interface FormPickup      { type: 'store' | 'quick'; deliveryFee: number | null; deliveryArea: string | null; storeNotes: string | null; }
 
 interface FormConfig {
   sizes:               FormSize[];
@@ -45,7 +45,7 @@ const DEFAULT: FormConfig = {
     { label: '숫자 초 꽂기',     price: 3000 },
     { label: '포토 이미지 인쇄', price: 5000 },
   ],
-  pickup: { type: 'store', deliveryFee: null, deliveryArea: null },
+  pickup: { type: 'store', deliveryFee: null, deliveryArea: null, storeNotes: null },
   cancellationPolicy:
     '픽업 7일 전 취소: 전액 환불\n픽업 3~6일 전 취소: 예약금 50% 환불\n픽업 1~2일 전 취소: 환불 불가\n제작 착수 후 취소: 환불 불가\n※ 단순 변심으로 인한 변경은 픽업 5일 전까지 가능합니다.',
 };
@@ -214,11 +214,20 @@ function TierSection({ tiers, onChange }: { tiers: FormDesignTier[]; onChange: (
   return (
     <Section title="디자인 난이도 티어" desc="난이도에 따른 추가금을 설정하세요." onAdd={add}>
       {tiers.map((t, i) => (
-        <div key={i} className="flex items-start gap-2">
-          <FInput value={t.name} onChange={v => upd(i, { name: v })} placeholder="예) 베이직" className="w-24 shrink-0" />
-          <FInput value={t.description} onChange={v => upd(i, { description: v })} placeholder="포함 내용 설명" className="flex-1" />
-          <PriceInput value={t.extraPrice} onChange={v => upd(i, { extraPrice: v })} prefix="+₩" />
-          <MinusBtn onClick={() => del(i)} />
+        <div key={i} className="flex flex-col gap-1.5 pb-3 border-b-[0.5px] border-border last:border-0 last:pb-0">
+          {/* 1행: 티어명 + 추가금 + 삭제 */}
+          <div className="flex items-center gap-2">
+            <FInput value={t.name} onChange={v => upd(i, { name: v })} placeholder="예) 베이직" className="flex-1" />
+            <PriceInput value={t.extraPrice} onChange={v => upd(i, { extraPrice: v })} prefix="+₩" />
+            <MinusBtn onClick={() => del(i)} />
+          </div>
+          {/* 2행: 포함 내용 설명 */}
+          <FInput
+            value={t.description}
+            onChange={v => upd(i, { description: v })}
+            placeholder="포함 내용 설명 (예: 단색 크림, 레터링만)"
+            className="text-[12px] text-ink-muted"
+          />
         </div>
       ))}
     </Section>
@@ -251,14 +260,13 @@ function ExtraSection({ options, onChange }: { options: FormExtraOption[]; onCha
 const PICKUP_TABS: { value: FormPickup['type']; label: string }[] = [
   { value: 'store', label: '매장 픽업' },
   { value: 'quick', label: '퀵 배송'  },
-  { value: 'both',  label: '둘 다 가능' },
 ];
 
 function PickupSection({ pickup, onChange }: { pickup: FormPickup; onChange: (v: FormPickup) => void }) {
-  const showDelivery = pickup.type !== 'store';
   return (
     <SectionShell title="픽업 방법" desc="고객 주문서에 표시될 픽업 방식을 선택하세요.">
-      <div className="inline-flex p-[3px] bg-muted rounded-lg gap-[2px]">
+      {/* 방식 토글 */}
+      <div className="inline-flex p-[3px] bg-muted rounded-lg gap-[2px] mb-4">
         {PICKUP_TABS.map(({ value, label }) => (
           <button
             key={value}
@@ -270,8 +278,25 @@ function PickupSection({ pickup, onChange }: { pickup: FormPickup; onChange: (v:
           >{label}</button>
         ))}
       </div>
-      {showDelivery && (
-        <div className="mt-4 flex flex-col gap-3 bg-surface rounded-xl border-[0.5px] border-border p-4">
+
+      {/* 매장 픽업 준수사항 */}
+      {pickup.type === 'store' && (
+        <div className="flex flex-col gap-1.5">
+          <span className="text-[12px] font-medium text-ink-sub">준수사항 / 안내 문구</span>
+          <textarea
+            rows={3}
+            value={pickup.storeNotes ?? ''}
+            onChange={e => onChange({ ...pickup, storeNotes: e.target.value || null })}
+            placeholder="예) 픽업 시 주차는 건물 지하 1층 이용 가능합니다. 픽업 당일 30분 전 연락 부탁드려요."
+            className={`${INPUT_CLS} h-auto py-2 resize-y leading-relaxed`}
+          />
+          <p className="text-[11px] text-ink-muted">고객 주문서에 매장 픽업 안내와 함께 표시됩니다.</p>
+        </div>
+      )}
+
+      {/* 퀵 배송 설정 */}
+      {pickup.type === 'quick' && (
+        <div className="flex flex-col gap-3 bg-surface rounded-xl border-[0.5px] border-border p-4">
           <p className="text-[12px] text-ink-muted">퀵 배송 선택 시 고객 주문서에 자동 표시됩니다.</p>
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5">
@@ -304,7 +329,7 @@ function PickupSection({ pickup, onChange }: { pickup: FormPickup; onChange: (v:
 
 function PolicySection({ policy, onChange }: { policy: string; onChange: (v: string) => void }) {
   return (
-    <SectionShell title="취소 · 환불 규정" desc="고객 주문서 하단에 표시됩니다.">
+    <SectionShell title="취소 · 환불 규정" desc="고객 주문서 하단에 표시됩니다. (매장 운영에 맞게 수정해주세요)">
       <textarea
         rows={6}
         value={policy}
@@ -336,7 +361,7 @@ function PriceInput({ value, onChange, prefix = '₩' }: {
   value: number; onChange: (v: number) => void; prefix?: string;
 }) {
   return (
-    <div className="relative shrink-0 w-32">
+    <div className="relative shrink-0 w-36">
       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[12px] text-ink-muted pointer-events-none">{prefix}</span>
       <input
         type="number"
@@ -344,7 +369,7 @@ function PriceInput({ value, onChange, prefix = '₩' }: {
         value={value || ''}
         onChange={e => onChange(Number(e.target.value) || 0)}
         placeholder="0"
-        className={`${INPUT_CLS} pl-8`}
+        className={`${INPUT_CLS} pl-8 text-right pr-3`}
       />
     </div>
   );

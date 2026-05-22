@@ -38,9 +38,10 @@ class FormExtraOption(CamelModel):
 
 
 class FormPickup(CamelModel):
-    type: Literal['store', 'quick', 'both'] = 'store'
+    type: Literal['store', 'quick'] = 'store'
     delivery_fee: int | None = None
     delivery_area: str | None = None
+    store_notes: str | None = None   # 매장 픽업 준수사항
 
 
 class FormConfig(CamelModel):
