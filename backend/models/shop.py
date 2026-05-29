@@ -12,8 +12,11 @@ class Shop(Base):
     owner_name: Mapped[str | None] = mapped_column(String(50))
     phone: Mapped[str | None] = mapped_column(String(20))
     daily_limit: Mapped[int] = mapped_column(Integer, default=5)
+    inquiry_expire_minutes: Mapped[int] = mapped_column(Integer, default=60)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
-    users: Mapped[list["User"]] = relationship("User", back_populates="shop")  # type: ignore[name-defined]
-    orders: Mapped[list["Order"]] = relationship("Order", back_populates="shop")  # type: ignore[name-defined]
+    users:       Mapped[list["User"]]       = relationship("User",       back_populates="shop")  # type: ignore[name-defined]
+    customers:   Mapped[list["Customer"]]   = relationship("Customer",   back_populates="shop")  # type: ignore[name-defined]
+    orders:      Mapped[list["Order"]]      = relationship("Order",      back_populates="shop")  # type: ignore[name-defined]
+    expenses:    Mapped[list["Expense"]]    = relationship("Expense",    back_populates="shop")  # type: ignore[name-defined]
     form_config: Mapped["FormConfig | None"] = relationship("FormConfig", back_populates="shop", uselist=False)  # type: ignore[name-defined]

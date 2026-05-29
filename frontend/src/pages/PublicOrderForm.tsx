@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
@@ -36,6 +36,13 @@ interface PublicShop {
   formConfig:    FormConfig | null;
 }
 
+interface AvailabilityDay {
+  date:   string;
+  count:  number;
+  limit:  number;
+  status: 'available' | 'almost' | 'full';
+}
+
 interface FormState {
   customerName:  string;
   customerPhone: string;
@@ -53,6 +60,7 @@ interface FormState {
 // ── 유틸 ─────────────────────────────────────────────────────────────────
 
 const INPUT_CLS = 'w-full bg-white border-[0.5px] border-border rounded-md px-3 h-[44px] text-[14px] text-ink outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(200,145,122,0.18)] transition-[border-color,box-shadow] duration-200 placeholder:text-ink-muted';
+const API_BASE = (import.meta.env.VITE_API_URL ?? 'http://localhost:8000').replace(/\/$/, '');
 const MIN_DATE = dayjs().add(1, 'day').format('YYYY-MM-DD');
 
 function generateTimeSlots(hours: OperatingHours): string[] {
@@ -69,7 +77,143 @@ function generateTimeSlots(hours: OperatingHours): string[] {
 
 function fmt(n: number) { return n > 0 ? `+₩${n.toLocaleString()}` : '기본 포함'; }
 
+function parseUploadResponse(text: string): { url?: string; detail?: string } {
+  if (!text) return {};
+  try {
+    return JSON.parse(text) as { url?: string; detail?: string };
+  } catch {
+    return {};
+  }
+}
+
+function toAbsoluteUploadUrl(url: string): string {
+  return url.startsWith('/') ? `${API_BASE}${url}` : url;
+}
+
 // ── 메인 ─────────────────────────────────────────────────────────────────
+
+const DOW = ['일', '월', '화', '수', '목', '금', '토'];
+
+function DatePicker({ value, onChange, availability }: {
+  value: string;
+  onChange: (date: string) => void;
+  availability: AvailabilityDay[] | undefined;
+}) {
+  const avMap = Object.fromEntries((availability ?? []).map(a => [a.date, a]));
+  const today = dayjs();
+  const days  = Array.from({ length: 14 }, (_, i) => today.add(i, 'day'));
+  const emptyBefore = today.day();
+
+  return (
+    <div>
+      <div className="grid grid-cols-7 gap-1 mb-1">
+        {DOW.map((d, i) => (
+          <div key={d} className={`text-[10px] font-medium text-center ${
+            i === 0 ? 'text-red-400' : i === 6 ? 'text-blue-400' : 'text-ink-muted'
+          }`}>{d}</div>
+        ))}
+      </div>
+      <div className="grid grid-cols-7 gap-1">
+        {Array.from({ length: emptyBefore }).map((_, i) => <div key={`e${i}`} />)}
+        {days.map(d => {
+          const dateStr = d.format('YYYY-MM-DD');
+          const isPast  = dateStr < MIN_DATE;
+          const av      = avMap[dateStr];
+          const status  = isPast ? 'past' : (av?.status ?? (av ? 'available' : 'loading'));
+          const isSel   = value === dateStr;
+          const disabled = isPast || status === 'full';
+
+          const cellCls = isSel
+            ? 'bg-primary text-white'
+            : status === 'past'   ? 'bg-surface text-ink-muted opacity-50 cursor-not-allowed'
+            : status === 'full'   ? 'bg-surface text-ink-muted cursor-not-allowed'
+            : status === 'almost' ? 'bg-orange-50 text-orange-700 hover:bg-orange-100'
+            :                       'bg-green-50 text-green-700 hover:bg-green-100';
+
+          const label = isSel         ? '선택됨'
+            : status === 'past'       ? ''
+            : status === 'full'       ? '마감'
+            : status === 'almost'     ? '마감 임박'
+            : status === 'available'  ? '예약 가능'
+            :                           '';
+
+          const dow = d.day();
+          const numColor = isSel || status === 'past' || status === 'full' ? ''
+            : dow === 0 ? 'text-red-500'
+            : dow === 6 ? 'text-blue-500'
+            : '';
+
+          return (
+            <button
+              key={dateStr}
+              type="button"
+              disabled={disabled}
+              onClick={() => onChange(dateStr)}
+              className={`flex flex-col items-center justify-center rounded-lg py-2 gap-0.5 transition-colors ${cellCls}`}
+            >
+              <span className={`text-[12px] leading-none font-semibold ${numColor}`}>{d.format('D')}</span>
+              <span className="text-[10px] leading-none">{label}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+const MINUTES = ['00', '10', '20', '30', '40', '50'];
+const HALF_CLS = INPUT_CLS.replace('w-full', 'flex-1 min-w-0');
+
+function TimePicker({ value, onChange, slots }: {
+  value: string;
+  onChange: (time: string) => void;
+  slots?: string[];
+}) {
+  const [hour,   setHour]   = useState(value ? value.split(':')[0] : '');
+  const [minute, setMinute] = useState(value ? value.split(':')[1] : '');
+
+  // 폼 외부 리셋(처음부터 버튼) 대응 — value가 바뀔 때만 반응
+  useEffect(() => {
+    if (!value) { setHour(''); setMinute(''); }
+  }, [value]);
+
+  const hourOpts = slots
+    ? Array.from(new Set(slots.map(s => s.split(':')[0]))).sort()
+    : Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
+
+  const minuteOpts = slots
+    ? slots.filter(s => s.startsWith(`${hour}:`)).map(s => s.split(':')[1])
+    : MINUTES;
+
+  function handleHour(h: string) {
+    setHour(h);
+    setMinute(''); // 시 변경 시 분만 초기화, onChange 호출 안 함
+  }
+
+  function handleMinute(m: string) {
+    if (!hour) return;
+    setMinute(m);
+    onChange(`${hour}:${m}`);
+  }
+
+  return (
+    <div className="flex gap-2">
+      <select value={hour} onChange={e => handleHour(e.target.value)} className={HALF_CLS}>
+        <option value="">시</option>
+        {hourOpts.map(h => <option key={h} value={h}>{h}시</option>)}
+      </select>
+      <select
+        value={minute}
+        onChange={e => handleMinute(e.target.value)}
+        disabled={!hour}
+        className={`${HALF_CLS} disabled:opacity-50 disabled:cursor-not-allowed`}
+      >
+        <option value="">분</option>
+        {minuteOpts.map(m => <option key={m} value={m}>{m}분</option>)}
+      </select>
+    </div>
+  );
+}
 
 const EMPTY_FORM: FormState = {
   customerName: '', customerPhone: '', pickupDate: '', pickupTime: '',
@@ -88,6 +232,14 @@ export default function PublicOrderForm() {
     queryKey: ['public-shop', slug],
     queryFn:  () => apiFetch<PublicShop>(`/api/public/order/${slug}`),
     enabled: !!slug, retry: false,
+  });
+
+  const { data: availability } = useQuery<AvailabilityDay[]>({
+    queryKey: ['public-availability', slug],
+    queryFn:  () => apiFetch<AvailabilityDay[]>(
+      `/api/public/order/${slug}/availability?from=${dayjs().format('YYYY-MM-DD')}&days=14`
+    ),
+    enabled: !!slug,
   });
 
   const submitMutation = useMutation({
@@ -111,6 +263,7 @@ export default function PublicOrderForm() {
           lettering:     form.lettering,
           designNote:    extras,
           designImage:   form.designImage || undefined,
+          price:         totalEstimate,
         }),
       });
     },
@@ -126,13 +279,16 @@ export default function PublicOrderForm() {
     try {
       const fd = new FormData();
       fd.append('file', file);
-      const res = await fetch('/api/public/upload', { method: 'POST', body: fd });
-      if (!res.ok) throw new Error((await res.json()).detail ?? '업로드 실패');
-      const { url } = await res.json();
+      const res = await fetch(`${API_BASE}/api/public/upload`, { method: 'POST', body: fd });
+      const text = await res.text();
+      const data = parseUploadResponse(text);
+      if (!res.ok) throw new Error(data.detail ?? '이미지 업로드에 실패했습니다.');
+      if (!data.url) throw new Error('업로드된 이미지 URL을 받지 못했습니다.');
+      const url = toAbsoluteUploadUrl(data.url);
       setForm(f => ({ ...f, designImage: url }));
       toast.success('이미지가 업로드됐습니다.');
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : '업로드 실패');
+      toast.error(err instanceof Error ? err.message : '이미지 업로드에 실패했습니다.');
       setImagePreview(null);
     } finally {
       setUploading(false);
@@ -190,9 +346,10 @@ export default function PublicOrderForm() {
           <path d="M6 16l7 7 13-13" stroke="var(--color-success)" fill="none" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
       </div>
-      <div>
-        <h1 className="text-h2 font-semibold text-ink">주문이 접수되었어요!</h1>
-        <p className="text-body text-ink-sub mt-2">{data.shopName}에서 확인 후 연락드릴게요.</p>
+      <div className="flex flex-col gap-1.5 text-center">
+        <h1 className="text-h2 font-semibold text-ink">예약 신청이 완료되었습니다.</h1>
+        <p className="text-body text-ink-sub">1시간 이내 예약금 입금 확인 후 확정됩니다.</p>
+        <p className="text-body text-ink-muted">미입금 시 예약이 자동으로 취소됩니다.</p>
       </div>
       {cfg?.kakaoChannelUrl && (
         <a href={cfg.kakaoChannelUrl} target="_blank" rel="noopener noreferrer"
@@ -250,22 +407,18 @@ export default function PublicOrderForm() {
         {/* 픽업 일정 */}
         <Fieldset legend="픽업 일정">
           <Field label="픽업 날짜" required>
-            <input type="date" required min={MIN_DATE} value={form.pickupDate}
-              onChange={e => setForm(f => ({ ...f, pickupDate: e.target.value }))} className={INPUT_CLS}/>
-            <p className="text-[11px] text-ink-muted mt-1">오늘 이후 날짜를 선택해 주세요.</p>
+            <DatePicker
+              value={form.pickupDate}
+              onChange={date => setForm(f => ({ ...f, pickupDate: date }))}
+              availability={availability}
+            />
           </Field>
           <Field label="픽업 시간">
-            {timeSlots ? (
-              <select value={form.pickupTime}
-                onChange={e => setForm(f => ({ ...f, pickupTime: e.target.value }))}
-                className={INPUT_CLS}>
-                <option value="">시간 선택</option>
-                {timeSlots.map(t => <option key={t} value={t}>{t}</option>)}
-              </select>
-            ) : (
-              <input type="time" step={600} value={form.pickupTime}
-                onChange={e => setForm(f => ({ ...f, pickupTime: e.target.value }))} className={INPUT_CLS}/>
-            )}
+            <TimePicker
+              value={form.pickupTime}
+              onChange={t => setForm(f => ({ ...f, pickupTime: t }))}
+              slots={timeSlots ?? undefined}
+            />
             {cfg?.operatingHours && (
               <p className="text-[11px] text-ink-muted mt-1">
                 픽업 가능 시간: {cfg.operatingHours.start} ~ {cfg.operatingHours.end}

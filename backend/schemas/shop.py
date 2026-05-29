@@ -108,6 +108,7 @@ class PublicOrderCreate(CamelModel):
     lettering:      str | None = None
     design_note:    str | None = None
     design_image:   str | None = None
+    price:          int = 0
 
 
 # ── 유틸 ─────────────────────────────────────────────────────────────────

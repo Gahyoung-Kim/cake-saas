@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ko';
@@ -34,15 +34,15 @@ export default function ReservationListPage() {
   const [tab,    setTab]    = useState<ReservationStatus | 'all'>('all');
   const [search, setSearch] = useState('');
   const [page,   setPage]   = useState(1);
+  const isComposing = useRef(false);
 
-  // 탭 변경 시 페이지 리셋
   function handleTabChange(t: ReservationStatus | 'all') {
     setTab(t);
     setPage(1);
   }
 
-  // 검색 변경 시 페이지 리셋
   function handleSearch(v: string) {
+    if (isComposing.current) return;
     setSearch(v);
     setPage(1);
   }
@@ -200,7 +200,9 @@ export default function ReservationListPage() {
                 type="search"
                 value={search}
                 onChange={(e) => handleSearch(e.target.value)}
-                placeholder="고객명 또는 케이크 검색"
+                onCompositionStart={() => { isComposing.current = true; }}
+                onCompositionEnd={(e) => { isComposing.current = false; handleSearch(e.currentTarget.value); }}
+                placeholder="고객명, 케이크 또는 연락처 검색"
                 className="w-full pl-9 pr-3 h-9 bg-bg border-[0.5px] border-border rounded-md text-[13px] text-ink outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(200,145,122,0.18)] placeholder:text-ink-muted transition-[border-color,box-shadow] duration-200"
               />
             </div>
@@ -219,7 +221,9 @@ export default function ReservationListPage() {
               type="search"
               value={search}
               onChange={(e) => handleSearch(e.target.value)}
-              placeholder="고객명 또는 케이크 검색"
+              onCompositionStart={() => { isComposing.current = true; }}
+              onCompositionEnd={(e) => { isComposing.current = false; handleSearch(e.currentTarget.value); }}
+              placeholder="고객명, 케이크 또는 연락처 검색"
               className="w-full pl-9 pr-3 h-9 bg-bg border-[0.5px] border-border rounded-md text-[13px] text-ink outline-none focus:border-primary placeholder:text-ink-muted"
             />
           </div>

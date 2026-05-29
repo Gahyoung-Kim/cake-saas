@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
@@ -5,6 +6,7 @@ from sqlalchemy.orm import Session
 from ..database import get_db
 from ..models.user import User
 from ..models.order import Order, OrderStatus
+from ..services.customers import get_or_create_customer
 from ..schemas.order import (
     OrderCreate, OrderUpdate, StatusUpdate, DepositUpdate,
     OrderResponse, OrderListResponse,
@@ -41,7 +43,9 @@ def list_orders(
     if search:
         like = f"%{search}%"
         q = q.filter(
-            Order.customer_name.ilike(like) | Order.cake_flavor.ilike(like)
+            Order.customer_name.ilike(like)
+            | Order.cake_flavor.ilike(like)
+            | Order.customer_phone.ilike(like)
         )
     total = q.count()
     items = (
@@ -59,7 +63,15 @@ def create_order(
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[Session, Depends(get_db)],
 ):
-    order = Order(**body.model_dump(), shop_id=current_user.shop_id)
+    data = body.model_dump()
+    customer = get_or_create_customer(
+        db,
+        shop_id=current_user.shop_id,
+        name=data.get("customer_name"),
+        phone=data.get("customer_phone"),
+        ordered_at=datetime.utcnow(),
+    )
+    order = Order(**data, shop_id=current_user.shop_id, customer_id=customer.id if customer else None)
     db.add(order)
     db.commit()
     db.refresh(order)
@@ -83,8 +95,18 @@ def update_order(
     db: Annotated[Session, Depends(get_db)],
 ):
     order = _get_order(order_id, current_user.shop_id, db)
-    for k, v in body.model_dump(exclude_none=True).items():
+    data = body.model_dump(exclude_none=True)
+    for k, v in data.items():
         setattr(order, k, v)
+    if "customer_name" in data or "customer_phone" in data:
+        customer = get_or_create_customer(
+            db,
+            shop_id=current_user.shop_id,
+            name=order.customer_name,
+            phone=order.customer_phone,
+            ordered_at=order.created_at,
+        )
+        order.customer_id = customer.id if customer else None
     db.commit()
     db.refresh(order)
     return order

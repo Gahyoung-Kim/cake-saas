@@ -5,37 +5,39 @@ from .base import CamelModel
 
 
 class OrderCreate(CamelModel):
-    customer_name: str | None = None
+    customer_name:  str | None = None
     customer_phone: str | None = None
-    pickup_date: date
-    pickup_time: str | None = None
-    cake_size: str | None = None
-    cake_flavor: str | None = None
-    lettering: str | None = None
-    design_note: str | None = None
-    design_image: str | None = None
-    price: int = 0
-    deposit: int = 0
-    raw_chat: str | None = None
-    memo: str | None = None
-    status: OrderStatus = OrderStatus.inquiry
+    pickup_date:    date
+    pickup_time:    str | None = None
+    cake_size:      str | None = None
+    cake_flavor:    str | None = None
+    lettering:      str | None = None
+    design_note:    str | None = None
+    design_image:   str | None = None
+    price:          int = 0
+    cost_price:     int = 0
+    deposit:        int = 0
+    raw_chat:       str | None = None
+    memo:           str | None = None
+    status:         OrderStatus = OrderStatus.inquiry
 
 
 class OrderUpdate(CamelModel):
-    customer_name: str | None = None
+    customer_name:  str | None = None
     customer_phone: str | None = None
-    pickup_date: date | None = None
-    pickup_time: str | None = None
-    cake_size: str | None = None
-    cake_flavor: str | None = None
-    lettering: str | None = None
-    design_note: str | None = None
-    design_image: str | None = None
-    price: int | None = None
-    deposit: int | None = None
-    deposit_paid: bool | None = None
-    memo: str | None = None
-    status: OrderStatus | None = None
+    pickup_date:    date | None = None
+    pickup_time:    str | None = None
+    cake_size:      str | None = None
+    cake_flavor:    str | None = None
+    lettering:      str | None = None
+    design_note:    str | None = None
+    design_image:   str | None = None
+    price:          int | None = None
+    cost_price:     int | None = None
+    deposit:        int | None = None
+    deposit_paid:   bool | None = None
+    memo:           str | None = None
+    status:         OrderStatus | None = None
 
 
 class StatusUpdate(CamelModel):
@@ -49,6 +51,7 @@ class DepositUpdate(CamelModel):
 class OrderResponse(CamelModel):
     id: int
     shop_id: int
+    customer_id: int | None
     customer_name: str | None
     customer_phone: str | None
     pickup_date: date
@@ -58,14 +61,15 @@ class OrderResponse(CamelModel):
     lettering: str | None
     design_note: str | None
     design_image: str | None
-    price: int
-    deposit: int
+    price:       int
+    cost_price:  int
+    deposit:     int
     deposit_paid: bool
-    status: OrderStatus
-    raw_chat: str | None
-    memo: str | None
-    created_at: datetime
-    updated_at: datetime
+    status:      OrderStatus
+    raw_chat:    str | None
+    memo:        str | None
+    created_at:  datetime
+    updated_at:  datetime
 
 
 class OrderListResponse(CamelModel):

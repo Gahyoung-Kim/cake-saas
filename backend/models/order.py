@@ -18,6 +18,7 @@ class Order(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     shop_id: Mapped[int] = mapped_column(Integer, ForeignKey("shops.id"), nullable=False)
+    customer_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("customers.id"))
     customer_name: Mapped[str | None] = mapped_column(String(50))
     customer_phone: Mapped[str | None] = mapped_column(String(20))
     pickup_date: Mapped[datetime] = mapped_column(Date, nullable=False)
@@ -27,12 +28,14 @@ class Order(Base):
     lettering: Mapped[str | None] = mapped_column(String(200))
     design_note: Mapped[str | None] = mapped_column(Text)
     design_image: Mapped[str | None] = mapped_column(String(500))
-    price: Mapped[int] = mapped_column(Integer, default=0)
-    deposit: Mapped[int] = mapped_column(Integer, default=0)
+    price:       Mapped[int] = mapped_column(Integer, default=0)
+    cost_price:  Mapped[int] = mapped_column(Integer, default=0)
+    deposit:     Mapped[int] = mapped_column(Integer, default=0)
     deposit_paid: Mapped[bool] = mapped_column(Boolean, default=False)
     status: Mapped[OrderStatus] = mapped_column(
         Enum(OrderStatus), default=OrderStatus.inquiry
     )
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     raw_chat: Mapped[str | None] = mapped_column(Text)
     memo: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
@@ -41,3 +44,4 @@ class Order(Base):
     )
 
     shop: Mapped["Shop"] = relationship("Shop", back_populates="orders")  # type: ignore[name-defined]
+    customer: Mapped["Customer | None"] = relationship("Customer", back_populates="orders")  # type: ignore[name-defined]

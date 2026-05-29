@@ -48,43 +48,28 @@ export default function ReservationDetailModal({
   return (
     <AnimatePresence>
       {open && (
-        <>
-          {/* ── Overlay ── */}
-          <motion.div
-            key="overlay"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-ink/25 z-50 backdrop-blur-[1px]"
-            onClick={onClose}
-          />
-
-          {/* ── Panel ── */}
+        /* ── 오버레이 (스크롤 담당) ── */
+        <motion.div
+          key="overlay"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-50 bg-ink/25 backdrop-blur-[1px] overflow-y-auto py-8 px-4"
+          onClick={onClose}
+        >
+          {/* ── 패널 (높이 제한 없음) ── */}
           <motion.div
             key="panel"
-            initial={{ opacity: 0, y: 48 }}
+            initial={{ opacity: 0, y: 32 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 48 }}
-            transition={{ duration: 0.32, ease: EASE }}
-            className={[
-              // 공통
-              'fixed z-50 bg-bg shadow-lg overflow-hidden flex flex-col',
-              // 모바일: 하단 시트
-              'bottom-0 left-0 right-0 max-h-[88vh] rounded-t-2xl',
-              // 데스크탑: 센터 모달
-              'md:inset-auto md:rounded-xl',
-              'md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2',
-              'md:w-[560px] md:max-h-[90vh]',
-            ].join(' ')}
+            exit={{ opacity: 0, y: 32 }}
+            transition={{ duration: 0.28, ease: EASE }}
+            className="relative bg-bg shadow-lg rounded-xl mx-auto w-full max-w-[560px]"
+            onClick={(e) => e.stopPropagation()}
           >
-            {/* 모바일 드래그 핸들 */}
-            <div className="md:hidden flex justify-center pt-3 pb-1 shrink-0">
-              <div className="w-9 h-1 rounded-full bg-border" />
-            </div>
-
             {/* ── 헤더 ── */}
-            <div className="flex items-start justify-between px-5 pt-4 pb-3 border-b-[0.5px] border-border shrink-0">
+            <div className="flex items-start justify-between px-5 pt-4 pb-3 border-b-[0.5px] border-border">
               <div className="flex items-center gap-2.5 flex-wrap">
                 <h2 className="text-h3 font-semibold text-ink">예약 상세</h2>
                 <StatusBadge status={r.status} />
@@ -101,8 +86,8 @@ export default function ReservationDetailModal({
               </button>
             </div>
 
-            {/* ── 본문 (스크롤 가능) ── */}
-            <div className="overflow-y-auto flex-1 px-5 py-4 flex flex-col gap-5">
+            {/* ── 본문 ── */}
+            <div className="px-5 py-4 flex flex-col gap-5">
 
               {/* 픽업 일시 */}
               <InfoSection label="픽업 일시">
@@ -221,7 +206,7 @@ export default function ReservationDetailModal({
 
             {/* ── 삭제 확인 배너 ── */}
             {confirmDelete && (
-              <div className="px-5 py-3 bg-status-cancel-bg border-t-[0.5px] border-status-cancel-fg/20 shrink-0">
+              <div className="px-5 py-3 bg-status-cancel-bg border-t-[0.5px] border-status-cancel-fg/20">
                 <p className="text-[13px] text-status-cancel-fg font-medium mb-2">
                   예약을 삭제하면 복구할 수 없어요. 정말 삭제할까요?
                 </p>
@@ -245,7 +230,7 @@ export default function ReservationDetailModal({
             )}
 
             {/* ── 액션 버튼 영역 ── */}
-            <div className="px-5 py-4 border-t-[0.5px] border-border bg-surface/60 shrink-0">
+            <div className="px-5 py-4 border-t-[0.5px] border-border bg-surface/60 rounded-b-xl">
               <div className="flex items-center gap-2">
 
                 {/* 수정 버튼 — 항상 표시 (onEdit 있을 때) */}
@@ -269,7 +254,7 @@ export default function ReservationDetailModal({
                     disabled={isLoading}
                     className="h-10 px-4 rounded-md text-[13px] font-medium text-ink-sub border-[0.5px] border-border hover:bg-muted hover:text-ink disabled:opacity-40 transition-colors"
                   >
-                    취소
+                    주문취소
                   </button>
                 )}
 
@@ -312,7 +297,7 @@ export default function ReservationDetailModal({
               </div>
             </div>
           </motion.div>
-        </>
+        </motion.div>
       )}
     </AnimatePresence>
   );

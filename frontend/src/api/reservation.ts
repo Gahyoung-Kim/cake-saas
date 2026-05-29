@@ -12,6 +12,7 @@ export type ReservationStatus =
 export interface Reservation {
   id: number;
   shopId: number;
+  customerId: number | null;
   customerName: string;
   customerPhone: string | null;
   pickupDate: string;         // "YYYY-MM-DD"
@@ -22,6 +23,7 @@ export interface Reservation {
   designNote: string | null;
   designImage: string | null;
   price: number;
+  costPrice: number;
   deposit: number;
   depositPaid: boolean;
   status: ReservationStatus;
@@ -93,6 +95,7 @@ export interface ReservationFormData {
   lettering?: string;
   designNote?: string;
   price?: number;
+  costPrice?: number;
   deposit?: number;
   depositPaid?: boolean;
   status?: ReservationStatus;

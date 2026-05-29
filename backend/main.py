@@ -1,11 +1,21 @@
 import os
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from .routers import auth, orders, extract, calendar, public, shop, dashboard, customers, upload
+from .routers import auth, orders, extract, calendar, public, shop, dashboard, customers, upload, revenue
+from .services.scheduler import start_scheduler, stop_scheduler
 
-app = FastAPI(title="caker API", version="0.1.0")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    start_scheduler()
+    yield
+    stop_scheduler()
+
+
+app = FastAPI(title="caker API", version="0.1.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -29,6 +39,7 @@ app.include_router(upload.router,    prefix="/api/public",    tags=["upload"])
 app.include_router(shop.router,      prefix="/api/shop",      tags=["shop"])
 app.include_router(dashboard.router, prefix="/api/dashboard", tags=["dashboard"])
 app.include_router(customers.router, prefix="/api/customers", tags=["customers"])
+app.include_router(revenue.router,   prefix="/api",           tags=["revenue"])
 
 
 @app.get("/api/health")

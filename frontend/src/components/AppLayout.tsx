@@ -14,6 +14,7 @@ const NAV_ITEMS = [
   { to: '/customers',     label: '고객'                  },
   { to: '/extract',       label: '예약 추출',  badge: 'AI' },
   { to: '/calendar',      label: '캘린더'                 },
+  { to: '/revenue',       label: '매출 · 지출'           },
   { to: '/order-form',    label: '주문서 설정'            },
   { to: '/settings',      label: '설정'                   },
 ];
@@ -29,11 +30,21 @@ const MOBILE_TABS = [
 
 // ── 더보기 시트 항목 ─────────────────────────────────────────────────────
 
+function RevenueIcon() {
+  return (
+    <svg viewBox="0 0 20 20" width="20" height="20" className="text-ink-sub">
+      <path d="M4 14l3-4 3 2 3-5 3 3" stroke="currentColor" fill="none" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+      <rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" fill="none" strokeWidth="1.4"/>
+    </svg>
+  );
+}
+
 const MORE_ITEMS = [
-  { to: '/today',      label: '오늘 픽업',   icon: TodayIcon   },
-  { to: '/customers',  label: '고객 목록',   icon: PeopleIcon  },
-  { to: '/order-form', label: '주문서 설정', icon: FormIcon    },
-  { to: '/settings',   label: '설정',       icon: SettingsIcon },
+  { to: '/today',      label: '오늘 픽업',   icon: TodayIcon    },
+  { to: '/customers',  label: '고객 목록',   icon: PeopleIcon   },
+  { to: '/revenue',    label: '매출 · 지출', icon: RevenueIcon  },
+  { to: '/order-form', label: '주문서 설정', icon: FormIcon     },
+  { to: '/settings',   label: '설정',       icon: SettingsIcon  },
 ];
 
 // ── 아이콘 ───────────────────────────────────────────────────────────────

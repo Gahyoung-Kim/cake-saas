@@ -1,17 +1,15 @@
 import type { CalendarDay } from '../../api/reservation';
-
-// ── 상태별 도트 컬러 ──────────────────────────────────────────────────────
+import CakeIcon from '../CakeIcon';
 
 const DOT_COLOR: Record<string, string> = {
-  inquiry:   'bg-status-inquiry-fg',
-  confirmed: 'bg-status-confirmed-fg',
-  making:    'bg-status-making-fg',
-  done:      'bg-status-done-fg',
-  cancelled: 'bg-status-cancel-fg',
+  confirmed: '#3F7A52',
+  making:    '#46668C',
+  inquiry:   '#8A6A1F',
+  done:      '#C9A227',
+  cancelled: '#9F4A44',
 };
-
-// 상태 우선순위: 중요한 것부터 앞에 표시
-const STATUS_ORDER = ['making', 'confirmed', 'inquiry', 'done', 'cancelled'] as const;
+const STATUS_ORDER = ['confirmed', 'making', 'inquiry', 'done', 'cancelled'] as const;
+const MAX_DOTS = 3;
 
 interface Props {
   day: number;
@@ -27,101 +25,77 @@ interface Props {
 export default function DayCell({
   day, dateStr, info, isToday, isSelected, isOtherMonth = false, colIdx, onClick,
 }: Props) {
-  const count    = info?.count ?? 0;
-  const isOver   = info?.isOverLimit ?? false;
-  const hasDot   = count > 0;
+  const count  = info?.count ?? 0;
+  const isOver = info?.isOverLimit ?? false;
+  const hasOrders = count > 0;
 
-  // 도트 배열 생성 (우선순위 순)
   const dots: string[] = [];
   for (const s of STATUS_ORDER) {
-    const n = info?.[s as keyof CalendarDay] as number ?? 0;
-    for (let i = 0; i < n; i++) dots.push(DOT_COLOR[s]);
+    const n = info?.[s] ?? 0;
+    for (let i = 0; i < n && dots.length < MAX_DOTS; i++) dots.push(DOT_COLOR[s]);
   }
 
-  const MAX_MOBILE  = 3;
-  const MAX_DESKTOP = 5;
-
-  const mobileExtra  = Math.max(0, dots.length - MAX_MOBILE);
-  const desktopExtra = Math.max(0, dots.length - MAX_DESKTOP);
+  const cellBg = isSelected
+    ? undefined
+    : isOver
+    ? 'rgba(196,112,106,0.12)'
+    : hasOrders
+    ? 'rgba(200,145,122,0.10)'
+    : undefined;
 
   return (
     <button
       onClick={onClick}
       data-date={dateStr}
+      style={cellBg ? { backgroundColor: cellBg } : undefined}
       className={[
         'text-left w-full flex flex-col transition-colors duration-150',
-        // 높이: 모바일 44px, 데스크탑 80px
-        'min-h-[44px] md:min-h-[80px]',
-        // 패딩
+        'min-h-[72px]',
         'p-1.5 md:p-2',
-        // 경계
         'border-b-[0.5px] border-r-[0.5px] border-border',
-        // 배경
-        isSelected  ? 'bg-primary-light'
-        : isOver    ? 'bg-status-cancel-bg/50'
+        isSelected   ? 'bg-primary-light'
         : isOtherMonth ? 'bg-surface/40'
-        : 'hover:bg-surface',
+        : !hasOrders  ? 'hover:bg-surface'
+        : '',
       ].join(' ')}
     >
-      {/* ── 날짜 숫자 ── */}
-      <span className={[
-        'flex items-center justify-center rounded-full font-medium leading-none shrink-0',
-        // 크기: 모바일 22px, 데스크탑 24px
-        'w-[22px] h-[22px] text-[11px] md:w-6 md:h-6 md:text-[13px]',
-        isToday     ? 'bg-primary text-bg font-semibold'
-        : isSelected ? 'bg-primary text-bg'
-        : isOtherMonth ? 'text-ink-muted'
-        : colIdx === 0 ? 'text-danger'
-        : colIdx === 6 ? 'text-primary'
-        : 'text-ink',
-      ].join(' ')}>
-        {day}
-      </span>
-
-      {/* ── 데스크탑: 건수 텍스트 ── */}
-      {hasDot && (
+      {/* ── 날짜 숫자 + 상태 도트 ── */}
+      <div className="flex items-center gap-[4px]">
         <span className={[
-          'hidden md:block text-[10px] font-semibold leading-none mt-1',
-          isOver ? 'text-status-cancel-fg' : 'text-ink-muted',
+          'flex items-center justify-center rounded-full font-medium leading-none shrink-0',
+          'w-[22px] h-[22px] text-[11px] md:w-6 md:h-6 md:text-[13px]',
+          isToday      ? 'bg-primary text-bg font-semibold'
+          : isSelected  ? 'bg-primary text-bg'
+          : isOtherMonth ? 'text-ink-muted'
+          : colIdx === 0 ? 'text-danger'
+          : colIdx === 6 ? 'text-primary'
+          : 'text-ink',
         ].join(' ')}>
-          {count}건
+          {day}
         </span>
-      )}
-
-      {/* ── 도트 영역 ── */}
-      {hasDot && (
-        <>
-          {/* 모바일: 최대 3개 + "+N" */}
-          <div className="flex items-center gap-[3px] mt-auto md:hidden flex-wrap">
-            {dots.slice(0, MAX_MOBILE).map((color, i) => (
-              <span key={i} className={`w-[5px] h-[5px] rounded-full shrink-0 ${color}`} />
+        {dots.length > 0 && (
+          <div className="flex flex-wrap gap-[3px] max-w-[18px]">
+            {dots.map((color, i) => (
+              <span
+                key={i}
+                style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: color, flexShrink: 0 }}
+              />
             ))}
-            {mobileExtra > 0 && (
-              <span className="text-[8px] font-semibold text-ink-muted leading-none">
-                +{mobileExtra}
-              </span>
-            )}
           </div>
+        )}
+      </div>
 
-          {/* 데스크탑: 최대 5개 + "+N" */}
-          <div className="hidden md:flex items-center gap-[3px] mt-1 flex-wrap">
-            {dots.slice(0, MAX_DESKTOP).map((color, i) => (
-              <span key={i} className={`w-[6px] h-[6px] rounded-full shrink-0 ${color}`} />
-            ))}
-            {desktopExtra > 0 && (
-              <span className="text-[9px] font-semibold text-ink-muted leading-none">
-                +{desktopExtra}
-              </span>
-            )}
-          </div>
-        </>
-      )}
-
-      {/* ── 한도 초과 마커 (데스크탑) ── */}
-      {isOver && (
-        <span className="hidden md:block text-[9px] text-status-cancel-fg font-medium leading-none mt-0.5">
-          한도 초과
-        </span>
+      {/* ── 케이크 아이콘 + 건수 ── */}
+      {hasOrders && (
+        <div className="flex items-center gap-[4px] mt-auto">
+          <CakeIcon size={40} overLimit={isOver} />
+          <span
+            className="font-num leading-none"
+            style={{ fontSize: 11, color: 'var(--color-text-sub)' }}
+          >
+            ×{count}
+          </span>
+        </div>
       )}
     </button>
   );

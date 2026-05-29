@@ -12,6 +12,7 @@ dayjs.locale('ko');
 // ── 상수 ─────────────────────────────────────────────────────────────────
 
 const EASE: [number, number, number, number] = [0.22, 0.61, 0.36, 1];
+const API_BASE = (import.meta.env.VITE_API_URL ?? 'http://localhost:8000').replace(/\/$/, '');
 const MIN_DATE = dayjs().format('YYYY-MM-DD');
 
 const STATUS_OPTIONS: { value: ReservationStatus; label: string }[] = [
@@ -19,7 +20,7 @@ const STATUS_OPTIONS: { value: ReservationStatus; label: string }[] = [
   { value: 'confirmed', label: '확정'   },
   { value: 'making',    label: '제작중' },
   { value: 'done',      label: '완료'   },
-  { value: 'cancelled', label: '취소'   },
+  { value: 'cancelled', label: '주문취소' },
 ];
 
 // ── 빈 폼 기본값 ─────────────────────────────────────────────────────────
@@ -36,6 +37,7 @@ function emptyForm(): ReservationFormData {
     designNote: '',
     designImage: '',
     price: undefined,
+    costPrice: undefined,
     deposit: undefined,
     depositPaid: false,
     status: 'inquiry',
@@ -55,11 +57,25 @@ function reservationToForm(r: Reservation): ReservationFormData {
     designNote:    r.designNote ?? '',
     designImage:   r.designImage ?? '',
     price:         r.price || undefined,
+    costPrice:     r.costPrice || undefined,
     deposit:       r.deposit || undefined,
     depositPaid:   r.depositPaid,
     status:        r.status,
     memo:          r.memo ?? '',
   };
+}
+
+function parseUploadResponse(text: string): { url?: string; detail?: string } {
+  if (!text) return {};
+  try {
+    return JSON.parse(text) as { url?: string; detail?: string };
+  } catch {
+    return {};
+  }
+}
+
+function toAbsoluteUploadUrl(url: string): string {
+  return url.startsWith('/') ? `${API_BASE}${url}` : url;
 }
 
 // ── Props ─────────────────────────────────────────────────────────────────
@@ -131,12 +147,12 @@ export default function ReservationFormModal({ mode, reservation, initialPickupD
     try {
       const fd = new FormData();
       fd.append('file', file);
-      const res = await fetch('/api/public/upload', { method: 'POST', body: fd });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ detail: '업로드 실패' }));
-        throw new Error(err.detail);
-      }
-      const { url } = await res.json();
+      const res = await fetch(`${API_BASE}/api/public/upload`, { method: 'POST', body: fd });
+      const text = await res.text();
+      const data = parseUploadResponse(text);
+      if (!res.ok) throw new Error(data.detail ?? '이미지 업로드에 실패했습니다.');
+      if (!data.url) throw new Error('업로드된 이미지 URL을 받지 못했습니다.');
+      const url = toAbsoluteUploadUrl(data.url);
       set('designImage', url);
       toast.success('이미지가 업로드됐습니다.');
     } catch (err) {
@@ -166,40 +182,27 @@ export default function ReservationFormModal({ mode, reservation, initialPickupD
   return (
     <AnimatePresence>
       {open && (
-        <>
-          {/* Overlay */}
-          <motion.div
-            key="form-overlay"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-ink/25 z-50 backdrop-blur-[1px]"
-            onClick={onClose}
-          />
-
-          {/* Panel */}
+        <motion.div
+          key="form-overlay"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-50 bg-ink/25 backdrop-blur-[1px] overflow-y-auto py-8 px-4"
+          onClick={onClose}
+        >
+          {/* 패널 (높이 제한 없음) */}
           <motion.div
             key="form-panel"
-            initial={{ opacity: 0, y: 48 }}
+            initial={{ opacity: 0, y: 32 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 48 }}
-            transition={{ duration: 0.32, ease: EASE }}
-            className={[
-              'fixed z-50 bg-bg shadow-lg flex flex-col overflow-hidden',
-              'bottom-0 left-0 right-0 max-h-[94vh] rounded-t-2xl',
-              'md:inset-auto md:rounded-xl',
-              'md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2',
-              'md:w-[600px] md:max-h-[92vh]',
-            ].join(' ')}
+            exit={{ opacity: 0, y: 32 }}
+            transition={{ duration: 0.28, ease: EASE }}
+            className="relative bg-bg shadow-lg rounded-xl mx-auto w-full max-w-[600px]"
+            onClick={(e) => e.stopPropagation()}
           >
-            {/* 모바일 핸들 */}
-            <div className="md:hidden flex justify-center pt-3 pb-1 shrink-0">
-              <div className="w-9 h-1 rounded-full bg-border" />
-            </div>
-
             {/* 헤더 */}
-            <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b-[0.5px] border-border shrink-0">
+            <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b-[0.5px] border-border">
               <h2 className="text-h3 font-semibold text-ink">{title}</h2>
               <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-muted text-ink-muted transition-colors" aria-label="닫기">
                 <svg viewBox="0 0 16 16" width="14" height="14">
@@ -209,7 +212,7 @@ export default function ReservationFormModal({ mode, reservation, initialPickupD
             </div>
 
             {/* 폼 본문 */}
-            <form onSubmit={handleSubmit} className="overflow-y-auto flex-1 px-5 py-4 flex flex-col gap-5">
+            <form onSubmit={handleSubmit} className="px-5 py-4 flex flex-col gap-5">
 
               {/* ── 고객 정보 ── */}
               <Fieldset legend="고객 정보">
@@ -370,15 +373,23 @@ export default function ReservationFormModal({ mode, reservation, initialPickupD
                       placeholder="0"
                     />
                   </Field>
-                  <Field label="예약금 (₩)">
+                  <Field label="원가 (₩)">
                     <Input
                       type="number"
-                      value={form.deposit != null ? String(form.deposit) : ''}
-                      onChange={(v) => set('deposit', v ? Number(v) : undefined)}
+                      value={form.costPrice != null ? String(form.costPrice) : ''}
+                      onChange={(v) => set('costPrice', v ? Number(v) : undefined)}
                       placeholder="0"
                     />
                   </Field>
                 </div>
+                <Field label="예약금 (₩)">
+                  <Input
+                    type="number"
+                    value={form.deposit != null ? String(form.deposit) : ''}
+                    onChange={(v) => set('deposit', v ? Number(v) : undefined)}
+                    placeholder="0"
+                  />
+                </Field>
                 <label className="flex items-center gap-2 cursor-pointer select-none">
                   <div
                     onClick={() => set('depositPaid', !form.depositPaid)}
@@ -426,7 +437,7 @@ export default function ReservationFormModal({ mode, reservation, initialPickupD
             </form>
 
             {/* 하단 버튼 */}
-            <div className="px-5 py-4 border-t-[0.5px] border-border bg-surface/60 flex items-center justify-end gap-2 shrink-0">
+            <div className="px-5 py-4 border-t-[0.5px] border-border bg-surface/60 rounded-b-xl flex items-center justify-end gap-2">
               <button
                 type="button"
                 onClick={onClose}
@@ -444,7 +455,7 @@ export default function ReservationFormModal({ mode, reservation, initialPickupD
               </button>
             </div>
           </motion.div>
-        </>
+        </motion.div>
       )}
     </AnimatePresence>
   );

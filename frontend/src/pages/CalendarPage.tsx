@@ -18,11 +18,11 @@ const EASE: [number, number, number, number] = [0.22, 0.61, 0.36, 1];
 // ── 범례 도트 색상 정의 ─────────────────────────────────────────────────────
 
 const LEGEND = [
-  { label: '확정',   color: 'bg-status-confirmed-fg' },
-  { label: '제작중', color: 'bg-status-making-fg'    },
-  { label: '문의',   color: 'bg-status-inquiry-fg'   },
-  { label: '완료',   color: 'bg-status-done-fg'      },
-  { label: '취소',   color: 'bg-status-cancel-fg'    },
+  { label: '확정',   color: '#3F7A52' },
+  { label: '제작중', color: '#46668C' },
+  { label: '문의',   color: '#8A6A1F' },
+  { label: '완료',   color: '#C9A227' },
+  { label: '취소',   color: '#9F4A44' },
 ];
 
 // ── Component ─────────────────────────────────────────────────────────────
@@ -132,7 +132,7 @@ export default function CalendarPage() {
             <div className="flex items-center gap-3 mt-4 text-caption text-ink-muted flex-wrap">
               {LEGEND.map(({ label, color }) => (
                 <span key={label} className="flex items-center gap-1">
-                  <span className={`w-[6px] h-[6px] rounded-full ${color}`} />
+                  <span className="w-[6px] h-[6px] rounded-full" style={{ backgroundColor: color }} />
                   {label}
                 </span>
               ))}
