@@ -62,6 +62,13 @@ cake-saas/                        # = c:\kkh\cake_saas
 - 웹 사이드바: 220px / 앱 탭바: 80px / FAB: 56px
 - 그림자: warm brown tint (rgba 61,43,36 기반)
 
+## AI Workspace 문서 구조
+- 이 문서(CLAUDE.md)와 [PROJECT_CONTEXT.md](./PROJECT_CONTEXT.md)는 고정 규칙/철학 문서 (거의 안 바뀜)
+- [GLOBAL.md](./GLOBAL.md): 현재 상태 (최근 작업 / 현재 스프린트 / 다음 우선순위) — 작업 종료 시 AUTO 영역 갱신
+- [skills/](./skills/): 프로젝트에서 축적된 작업 노하우 (project / frontend / backend)
+- Codex는 [AGENTS.md](./AGENTS.md)를 진입점으로 사용 (동일한 규칙을 가리킴)
+- 작업 종료 시 컨벤션은 AGENTS.md 참고. `python3 scripts/validate_workspace.py`로 AUTO 마커 형식만 기계적으로 검증 (내용 자동 생성 아님)
+
 ## 예약 상태값 ENUM
 inquiry → confirmed → making → done / cancelled
 
