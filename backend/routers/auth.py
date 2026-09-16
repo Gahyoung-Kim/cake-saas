@@ -1,5 +1,5 @@
 from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -8,6 +8,7 @@ from ..models.user import User
 from ..models.shop import Shop
 from ..schemas.auth import RegisterRequest, LoginRequest, TokenResponse, MeResponse
 from ..auth_utils import hash_password, verify_password, create_access_token, get_current_user
+from ..rate_limit import limiter
 
 router = APIRouter()
 
@@ -15,7 +16,8 @@ _alias = {"response_model_by_alias": True}
 
 
 @router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED, **_alias)
-def register(body: RegisterRequest, db: Annotated[Session, Depends(get_db)]):
+@limiter.limit("5/hour")
+def register(request: Request, body: RegisterRequest, db: Annotated[Session, Depends(get_db)]):
     if db.query(User).filter(User.email == body.email).first():
         raise HTTPException(status_code=409, detail="이미 사용 중인 이메일입니다.")
 
@@ -37,7 +39,8 @@ def register(body: RegisterRequest, db: Annotated[Session, Depends(get_db)]):
 
 
 @router.post("/login", response_model=TokenResponse, **_alias)
-def login(body: LoginRequest, db: Annotated[Session, Depends(get_db)]):
+@limiter.limit("10/minute")
+def login(request: Request, body: LoginRequest, db: Annotated[Session, Depends(get_db)]):
     user = db.query(User).filter(User.email == body.email).first()
     if not user or not verify_password(body.password, user.password_hash):
         raise HTTPException(status_code=401, detail="이메일 또는 비밀번호가 올바르지 않습니다.")

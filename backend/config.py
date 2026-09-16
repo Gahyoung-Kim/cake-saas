@@ -13,6 +13,16 @@ class Settings(BaseSettings):
     # 쉼표로 구분된 허용 오리진 (예: "https://caker.kr,https://www.caker.kr")
     CORS_ORIGINS: str = "http://localhost:5173,http://localhost:3000"
 
+    # AI 추출 모델
+    OPENAI_MODEL: str = "gpt-4o-mini"
+
+    # 요청 빈도 제한. 워커가 2개 이상이면 redis://... 를 지정해야 공유된다
+    RATE_LIMIT_ENABLED: bool = True
+    RATE_LIMIT_STORAGE_URI: str = ""
+
+    # 운영에서는 API 스펙을 공개하지 않는다
+    ENABLE_DOCS: bool = True
+
     model_config = SettingsConfigDict(
         env_file=".env",
         extra="ignore",  # VITE_* 등 프론트엔드 변수 무시

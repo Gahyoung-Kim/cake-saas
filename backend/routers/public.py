@@ -1,6 +1,6 @@
 from datetime import timedelta, date
 from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
@@ -8,6 +8,7 @@ from ..database import get_db
 from ..models.order import Order, OrderStatus
 from ..models.form_config import FormConfig
 from ..services.customers import get_or_create_customer
+from ..rate_limit import limiter
 from ..time_utils import today_kst, utcnow_naive
 from ..schemas.shop import PublicShopResponse, PublicOrderCreate, SizeOption, FlavorOption, parse_form_config
 
@@ -69,7 +70,9 @@ def get_public_form(slug: str, db: Annotated[Session, Depends(get_db)]):
 
 
 @router.post("/order/{slug}", status_code=201)
+@limiter.limit("5/hour")
 def submit_public_order(
+    request: Request,
     slug: str,
     body: PublicOrderCreate,
     db: Annotated[Session, Depends(get_db)],

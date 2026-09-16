@@ -1,9 +1,10 @@
 from datetime import timedelta
 from typing import Annotated
+
+import bcrypt
+import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError, jwt
-from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
 from .config import settings
@@ -11,16 +12,28 @@ from .database import get_db
 from .models.user import User
 from .time_utils import utcnow_naive
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
+
+# bcrypt는 72바이트를 넘는 입력을 거부한다. 한글은 UTF-8에서 글자당 3바이트라
+# 스키마의 72'자' 제한만으로는 초과할 수 있어, 해시/검증 양쪽에서 동일하게
+# 잘라낸다. (기존 passlib도 같은 방식으로 잘랐으므로 기존 해시와 호환된다)
+_BCRYPT_MAX_BYTES = 72
+
+
+def _prepare(password: str) -> bytes:
+    return password.encode("utf-8")[:_BCRYPT_MAX_BYTES]
 
 
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    return bcrypt.hashpw(_prepare(password), bcrypt.gensalt()).decode()
 
 
 def verify_password(plain: str, hashed: str) -> bool:
-    return pwd_context.verify(plain, hashed)
+    try:
+        return bcrypt.checkpw(_prepare(plain), hashed.encode())
+    except ValueError:
+        # 저장된 해시 형식이 깨진 경우 — 인증 실패로 처리한다
+        return False
 
 
 def create_access_token(data: dict) -> str:
@@ -39,13 +52,14 @@ def get_current_user(
     )
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-        user_id: int | None = payload.get("sub")
+        user_id = payload.get("sub")
         if user_id is None:
             raise credentials_exc
-    except JWTError:
+        user_key = int(user_id)
+    except (jwt.PyJWTError, TypeError, ValueError):
         raise credentials_exc
 
-    user = db.get(User, int(user_id))
+    user = db.get(User, user_key)
     if user is None:
         raise credentials_exc
     return user

@@ -40,7 +40,7 @@ def _parse_json(raw: str) -> dict:
 def extract_order(chat_text: str) -> dict:
     client = OpenAI(api_key=settings.OPENAI_API_KEY)
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=settings.OPENAI_MODEL,
         max_tokens=1024,
         messages=[
             {"role": "system", "content": _build_system_prompt()},
