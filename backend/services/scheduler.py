@@ -1,9 +1,8 @@
-from datetime import datetime, timezone
-
 from apscheduler.schedulers.background import BackgroundScheduler
 
 from ..database import SessionLocal
 from ..models.order import Order, OrderStatus
+from ..time_utils import utcnow_naive
 
 _scheduler = BackgroundScheduler(timezone="UTC")
 
@@ -11,7 +10,7 @@ _scheduler = BackgroundScheduler(timezone="UTC")
 def _expire_inquiries() -> None:
     db = SessionLocal()
     try:
-        now = datetime.now(timezone.utc).replace(tzinfo=None)
+        now = utcnow_naive()
         expired = (
             db.query(Order)
             .filter(

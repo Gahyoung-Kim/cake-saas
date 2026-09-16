@@ -2,6 +2,7 @@ from datetime import datetime
 from sqlalchemy import Integer, String, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from ..database import Base
+from ..time_utils import utcnow_naive
 
 
 class Shop(Base):
@@ -13,7 +14,7 @@ class Shop(Base):
     phone: Mapped[str | None] = mapped_column(String(20))
     daily_limit: Mapped[int] = mapped_column(Integer, default=5)
     inquiry_expire_minutes: Mapped[int] = mapped_column(Integer, default=60)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow_naive)
 
     users:       Mapped[list["User"]]       = relationship("User",       back_populates="shop")  # type: ignore[name-defined]
     customers:   Mapped[list["Customer"]]   = relationship("Customer",   back_populates="shop")  # type: ignore[name-defined]

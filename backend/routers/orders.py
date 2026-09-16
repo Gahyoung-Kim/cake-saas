@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
@@ -7,6 +6,7 @@ from ..database import get_db
 from ..models.user import User
 from ..models.order import Order, OrderStatus
 from ..services.customers import get_or_create_customer
+from ..time_utils import utcnow_naive
 from ..schemas.order import (
     OrderCreate, OrderUpdate, StatusUpdate, DepositUpdate,
     OrderResponse, OrderListResponse,
@@ -69,7 +69,7 @@ def create_order(
         shop_id=current_user.shop_id,
         name=data.get("customer_name"),
         phone=data.get("customer_phone"),
-        ordered_at=datetime.utcnow(),
+        ordered_at=utcnow_naive(),
     )
     order = Order(**data, shop_id=current_user.shop_id, customer_id=customer.id if customer else None)
     db.add(order)

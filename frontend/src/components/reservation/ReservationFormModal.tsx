@@ -5,14 +5,13 @@ import toast from 'react-hot-toast';
 import dayjs from 'dayjs';
 import { reservationApi } from '../../api/reservation';
 import type { Reservation, ReservationFormData, ReservationStatus } from '../../api/reservation';
-import { apiFetch } from '../../api/client';
+import { apiFetch, API_BASE, resolveUploadUrl } from '../../api/client';
 
 dayjs.locale('ko');
 
 // ── 상수 ─────────────────────────────────────────────────────────────────
 
 const EASE: [number, number, number, number] = [0.22, 0.61, 0.36, 1];
-const API_BASE = (import.meta.env.VITE_API_URL ?? 'http://localhost:8000').replace(/\/$/, '');
 const MIN_DATE = dayjs().format('YYYY-MM-DD');
 
 const STATUS_OPTIONS: { value: ReservationStatus; label: string }[] = [
@@ -74,10 +73,6 @@ function parseUploadResponse(text: string): { url?: string; detail?: string } {
   }
 }
 
-function toAbsoluteUploadUrl(url: string): string {
-  return url.startsWith('/') ? `${API_BASE}${url}` : url;
-}
-
 // ── Props ─────────────────────────────────────────────────────────────────
 
 interface Props {
@@ -113,7 +108,7 @@ export default function ReservationFormModal({ mode, reservation, initialPickupD
       ? reservationToForm(reservation)
       : { ...emptyForm(), pickupDate: initialPickupDate ?? '' };
     setForm(next);
-    setImagePreview(next.designImage || null);
+    setImagePreview(resolveUploadUrl(next.designImage) ?? null);
   }, [open, mode, reservation, initialPickupDate]);
 
   const mutation = useMutation({
@@ -152,8 +147,8 @@ export default function ReservationFormModal({ mode, reservation, initialPickupD
       const data = parseUploadResponse(text);
       if (!res.ok) throw new Error(data.detail ?? '이미지 업로드에 실패했습니다.');
       if (!data.url) throw new Error('업로드된 이미지 URL을 받지 못했습니다.');
-      const url = toAbsoluteUploadUrl(data.url);
-      set('designImage', url);
+      set('designImage', data.url);
+      setImagePreview(resolveUploadUrl(data.url) ?? null);
       toast.success('이미지가 업로드됐습니다.');
     } catch (err) {
       toast.error(err instanceof Error ? err.message : '이미지 업로드에 실패했습니다.');

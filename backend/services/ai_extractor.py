@@ -1,8 +1,8 @@
 import json
 import re
-from datetime import date
 from openai import OpenAI
 from ..config import settings
+from ..time_utils import today_kst
 
 _SYSTEM_TEMPLATE = """\
 다음 카카오톡/인스타그램/네이버 채팅 내용에서 케이크 주문 정보를 추출해줘.
@@ -26,7 +26,7 @@ _SYSTEM_TEMPLATE = """\
 
 
 def _build_system_prompt() -> str:
-    return _SYSTEM_TEMPLATE.format(today=date.today().isoformat())
+    return _SYSTEM_TEMPLATE.format(today=today_kst().isoformat())
 
 
 def _parse_json(raw: str) -> dict:

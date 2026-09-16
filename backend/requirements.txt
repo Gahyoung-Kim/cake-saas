@@ -13,3 +13,5 @@ openai>=1.30.0
 pydantic[email]==2.11.7
 pydantic-settings==2.10.1
 python-multipart==0.0.20
+apscheduler==3.11.3
+tzdata==2025.2  # slim 이미지에 IANA DB가 없어 ZoneInfo("Asia/Seoul")가 실패하는 것 방지

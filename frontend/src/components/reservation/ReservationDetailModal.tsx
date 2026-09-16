@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ko';
 import type { Reservation, ReservationStatus } from '../../api/reservation';
+import { resolveUploadUrl } from '../../api/client';
 import StatusBadge from './StatusBadge';
 
 dayjs.locale('ko');
@@ -145,9 +146,9 @@ export default function ReservationDetailModal({
                   {r.designImage && (
                     <div>
                       <div className="text-[11px] font-medium text-ink-muted mb-1.5">디자인 참고 이미지</div>
-                      <a href={r.designImage} target="_blank" rel="noopener noreferrer">
+                      <a href={resolveUploadUrl(r.designImage)} target="_blank" rel="noopener noreferrer">
                         <img
-                          src={r.designImage}
+                          src={resolveUploadUrl(r.designImage)}
                           alt="디자인 참고"
                           className="w-full max-h-56 object-contain rounded-lg border-[0.5px] border-border bg-surface hover:opacity-90 transition-opacity cursor-zoom-in"
                         />

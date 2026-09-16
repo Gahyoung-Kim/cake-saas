@@ -1,5 +1,6 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from ..database import get_db
@@ -24,7 +25,12 @@ def register(body: RegisterRequest, db: Annotated[Session, Depends(get_db)]):
 
     user = User(shop_id=shop.id, email=body.email, password_hash=hash_password(body.password))
     db.add(user)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        # 위 조회와 commit 사이에 같은 이메일이 먼저 들어온 경우
+        db.rollback()
+        raise HTTPException(status_code=409, detail="이미 사용 중인 이메일입니다.")
     db.refresh(user)
 
     return TokenResponse(access_token=create_access_token({"sub": str(user.id)}))

@@ -9,6 +9,7 @@ from ..models.user import User
 from ..models.order import Order, OrderStatus
 from ..schemas.base import CamelModel
 from ..auth_utils import get_current_user
+from ..time_utils import today_kst
 
 router = APIRouter()
 
@@ -49,7 +50,7 @@ def get_stats(
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[Session, Depends(get_db)],
 ):
-    today = date.today()
+    today = today_kst()
     y, m = today.year, today.month
 
     # 이번 달

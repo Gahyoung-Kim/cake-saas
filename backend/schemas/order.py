@@ -4,39 +4,43 @@ from ..models.order import OrderStatus
 from .base import CamelModel
 
 
+# 컬럼 길이는 models/order.py와 맞춘다
+_MONEY = {"ge": 0, "le": 100_000_000}
+
+
 class OrderCreate(CamelModel):
-    customer_name:  str | None = None
-    customer_phone: str | None = None
+    customer_name:  str | None = Field(default=None, max_length=50)
+    customer_phone: str | None = Field(default=None, max_length=20)
     pickup_date:    date
-    pickup_time:    str | None = None
-    cake_size:      str | None = None
-    cake_flavor:    str | None = None
-    lettering:      str | None = None
-    design_note:    str | None = None
-    design_image:   str | None = None
-    price:          int = 0
-    cost_price:     int = 0
-    deposit:        int = 0
-    raw_chat:       str | None = None
-    memo:           str | None = None
+    pickup_time:    str | None = Field(default=None, max_length=10)
+    cake_size:      str | None = Field(default=None, max_length=20)
+    cake_flavor:    str | None = Field(default=None, max_length=50)
+    lettering:      str | None = Field(default=None, max_length=200)
+    design_note:    str | None = Field(default=None, max_length=2000)
+    design_image:   str | None = Field(default=None, max_length=500)
+    price:          int = Field(default=0, **_MONEY)
+    cost_price:     int = Field(default=0, **_MONEY)
+    deposit:        int = Field(default=0, **_MONEY)
+    raw_chat:       str | None = Field(default=None, max_length=10000)
+    memo:           str | None = Field(default=None, max_length=2000)
     status:         OrderStatus = OrderStatus.inquiry
 
 
 class OrderUpdate(CamelModel):
-    customer_name:  str | None = None
-    customer_phone: str | None = None
+    customer_name:  str | None = Field(default=None, max_length=50)
+    customer_phone: str | None = Field(default=None, max_length=20)
     pickup_date:    date | None = None
-    pickup_time:    str | None = None
-    cake_size:      str | None = None
-    cake_flavor:    str | None = None
-    lettering:      str | None = None
-    design_note:    str | None = None
-    design_image:   str | None = None
-    price:          int | None = None
-    cost_price:     int | None = None
-    deposit:        int | None = None
+    pickup_time:    str | None = Field(default=None, max_length=10)
+    cake_size:      str | None = Field(default=None, max_length=20)
+    cake_flavor:    str | None = Field(default=None, max_length=50)
+    lettering:      str | None = Field(default=None, max_length=200)
+    design_note:    str | None = Field(default=None, max_length=2000)
+    design_image:   str | None = Field(default=None, max_length=500)
+    price:          int | None = Field(default=None, **_MONEY)
+    cost_price:     int | None = Field(default=None, **_MONEY)
+    deposit:        int | None = Field(default=None, **_MONEY)
     deposit_paid:   bool | None = None
-    memo:           str | None = None
+    memo:           str | None = Field(default=None, max_length=2000)
     status:         OrderStatus | None = None
 
 
@@ -92,7 +96,8 @@ class CalendarDay(CamelModel):
 
 
 class ExtractRequest(CamelModel):
-    chat_text: str
+    # 토큰 비용이 입력 길이에 비례하므로 상한을 둔다
+    chat_text: str = Field(min_length=1, max_length=5000)
 
 
 class ExtractResponse(CamelModel):

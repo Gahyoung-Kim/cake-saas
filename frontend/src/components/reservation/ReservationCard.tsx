@@ -2,6 +2,7 @@ import dayjs from 'dayjs';
 import 'dayjs/locale/ko';
 import StatusBadge, { STATUS_CONFIG } from './StatusBadge';
 import type { Reservation, ReservationStatus } from '../../api/reservation';
+import { resolveUploadUrl } from '../../api/client';
 
 dayjs.locale('ko');
 
@@ -86,7 +87,7 @@ export default function ReservationCard({ reservation: r, onStatusChange, onClic
         {/* 디자인 이미지 썸네일 */}
         {r.designImage && (
           <img
-            src={r.designImage}
+            src={resolveUploadUrl(r.designImage)}
             alt="디자인 참고"
             onClick={(e) => e.stopPropagation()}
             className="w-14 h-14 object-cover rounded-lg border-[0.5px] border-border shrink-0 cursor-zoom-in"

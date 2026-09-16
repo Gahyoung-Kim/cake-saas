@@ -1,5 +1,7 @@
 import json
+from datetime import date
 from typing import Literal
+from pydantic import Field, field_validator
 from .base import CamelModel
 
 
@@ -63,10 +65,10 @@ class FormConfig(CamelModel):
 # ── ShopUpdate / ShopResponse ─────────────────────────────────────────────
 
 class ShopUpdate(CamelModel):
-    name:                str | None        = None
-    owner_name:          str | None        = None
-    phone:               str | None        = None
-    daily_limit:         int | None        = None
+    name:                str | None        = Field(default=None, min_length=1, max_length=100)
+    owner_name:          str | None        = Field(default=None, max_length=50)
+    phone:               str | None        = Field(default=None, max_length=20)
+    daily_limit:         int | None        = Field(default=None, ge=1, le=100)
     # 기존 필드 (하위 호환)
     size_options:        list[SizeOption] | None = None
     flavor_options:      list[FlavorOption] | None = None
@@ -99,16 +101,27 @@ class PublicShopResponse(CamelModel):
 
 
 class PublicOrderCreate(CamelModel):
-    customer_name:  str
-    customer_phone: str | None = None
-    pickup_date:    str
-    pickup_time:    str | None = None
-    cake_size:      str | None = None
-    cake_flavor:    str | None = None
-    lettering:      str | None = None
-    design_note:    str | None = None
-    design_image:   str | None = None
-    price:          int = 0
+    customer_name:  str        = Field(min_length=1, max_length=50)
+    customer_phone: str | None = Field(default=None, max_length=20)
+    pickup_date:    date
+    pickup_time:    str | None = Field(default=None, max_length=10)
+    cake_size:      str | None = Field(default=None, max_length=20)
+    cake_flavor:    str | None = Field(default=None, max_length=50)
+    lettering:      str | None = Field(default=None, max_length=200)
+    design_note:    str | None = Field(default=None, max_length=2000)
+    design_image:   str | None = Field(default=None, max_length=500)
+    # 서버가 금액을 재계산하기 위해 필요한 선택값 (price는 참고용으로만 받는다)
+    design_tier:     str | None      = Field(default=None, max_length=100)
+    selected_extras: list[str]       = Field(default_factory=list, max_length=20)
+    price:           int             = Field(default=0, ge=0, le=100_000_000)
+
+    @field_validator("customer_name")
+    @classmethod
+    def _strip_name(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise ValueError("이름을 입력해 주세요.")
+        return v
 
 
 # ── 유틸 ─────────────────────────────────────────────────────────────────

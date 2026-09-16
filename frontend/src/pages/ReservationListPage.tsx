@@ -5,6 +5,7 @@ import 'dayjs/locale/ko';
 import toast from 'react-hot-toast';
 import { reservationApi } from '../api/reservation';
 import type { Reservation, ReservationStatus } from '../api/reservation';
+import { resolveUploadUrl } from '../api/client';
 import AppLayout from '../components/AppLayout';
 import StatusBadge, { STATUS_CONFIG } from '../components/reservation/StatusBadge';
 import ReservationCard from '../components/reservation/ReservationCard';
@@ -392,7 +393,7 @@ function TableRow({ reservation: r, onStatusChange, onClick }: RowProps) {
       <div className="min-w-0 flex items-start gap-2">
         {r.designImage && (
           <img
-            src={r.designImage}
+            src={resolveUploadUrl(r.designImage)}
             alt=""
             onClick={(e) => e.stopPropagation()}
             className="w-10 h-10 object-cover rounded-md border-[0.5px] border-border shrink-0 cursor-zoom-in hover:opacity-80 transition-opacity"

@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
+from .config import settings
 from .routers import auth, orders, extract, calendar, public, shop, dashboard, customers, upload, revenue
 from .services.scheduler import start_scheduler, stop_scheduler
 
@@ -19,7 +20,7 @@ app = FastAPI(title="caker API", version="0.1.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],
+    allow_origins=settings.cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

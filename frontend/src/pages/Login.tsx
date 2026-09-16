@@ -4,6 +4,9 @@ import toast from 'react-hot-toast';
 import { authApi } from '../api/auth';
 import { useAuthStore } from '../store/authStore';
 
+// 백엔드 schemas/auth.py의 PASSWORD_MIN과 맞춘다
+const PASSWORD_MIN = 8;
+
 export default function Login() {
   const navigate = useNavigate();
   const { setToken, setUser } = useAuthStore();
@@ -15,6 +18,10 @@ export default function Login() {
 
   async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault();
+    if (mode === 'register' && password.length < PASSWORD_MIN) {
+      toast.error(`비밀번호는 ${PASSWORD_MIN}자 이상이어야 합니다.`);
+      return;
+    }
     setLoading(true);
     try {
       if (mode === 'login') {
@@ -93,8 +100,12 @@ export default function Login() {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                minLength={mode === 'register' ? PASSWORD_MIN : undefined}
                 required
               />
+              {mode === 'register' && (
+                <span className="text-caption text-ink-muted">{PASSWORD_MIN}자 이상 입력해 주세요.</span>
+              )}
             </label>
             <button
               type="submit"

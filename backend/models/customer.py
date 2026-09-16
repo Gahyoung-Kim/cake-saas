@@ -2,6 +2,7 @@ from datetime import datetime
 from sqlalchemy import Integer, String, Text, DateTime, ForeignKey, Index, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from ..database import Base
+from ..time_utils import utcnow_naive
 
 
 class Customer(Base):
@@ -18,9 +19,9 @@ class Customer(Base):
     phone_normalized: Mapped[str | None] = mapped_column(String(20))
     memo: Mapped[str | None] = mapped_column(Text)
     last_order_at: Mapped[datetime | None] = mapped_column(DateTime)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow_naive)
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+        DateTime, default=utcnow_naive, onupdate=utcnow_naive
     )
 
     shop: Mapped["Shop"] = relationship("Shop", back_populates="customers")  # type: ignore[name-defined]

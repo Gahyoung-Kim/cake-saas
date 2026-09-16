@@ -4,7 +4,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ko';
-import { apiFetch } from '../api/client';
+import { apiFetch, API_BASE } from '../api/client';
 
 dayjs.locale('ko');
 
@@ -60,7 +60,6 @@ interface FormState {
 // ── 유틸 ─────────────────────────────────────────────────────────────────
 
 const INPUT_CLS = 'w-full bg-white border-[0.5px] border-border rounded-md px-3 h-[44px] text-[14px] text-ink outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(200,145,122,0.18)] transition-[border-color,box-shadow] duration-200 placeholder:text-ink-muted';
-const API_BASE = (import.meta.env.VITE_API_URL ?? 'http://localhost:8000').replace(/\/$/, '');
 const MIN_DATE = dayjs().add(1, 'day').format('YYYY-MM-DD');
 
 function generateTimeSlots(hours: OperatingHours): string[] {
@@ -84,10 +83,6 @@ function parseUploadResponse(text: string): { url?: string; detail?: string } {
   } catch {
     return {};
   }
-}
-
-function toAbsoluteUploadUrl(url: string): string {
-  return url.startsWith('/') ? `${API_BASE}${url}` : url;
 }
 
 // ── 메인 ─────────────────────────────────────────────────────────────────
@@ -263,7 +258,10 @@ export default function PublicOrderForm() {
           lettering:     form.lettering,
           designNote:    extras,
           designImage:   form.designImage || undefined,
-          price:         totalEstimate,
+          // 서버가 금액을 다시 계산하므로 선택값을 구조화해서 함께 보낸다
+          designTier:     form.designTier || undefined,
+          selectedExtras: form.selectedExtras,
+          price:          totalEstimate,
         }),
       });
     },
@@ -284,7 +282,7 @@ export default function PublicOrderForm() {
       const data = parseUploadResponse(text);
       if (!res.ok) throw new Error(data.detail ?? '이미지 업로드에 실패했습니다.');
       if (!data.url) throw new Error('업로드된 이미지 URL을 받지 못했습니다.');
-      const url = toAbsoluteUploadUrl(data.url);
+      const url = data.url;
       setForm(f => ({ ...f, designImage: url }));
       toast.success('이미지가 업로드됐습니다.');
     } catch (err) {

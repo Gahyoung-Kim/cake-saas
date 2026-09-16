@@ -3,6 +3,7 @@ from sqlalchemy import Integer, String, Text, Boolean, Date, Enum, DateTime, For
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 import enum
 from ..database import Base
+from ..time_utils import utcnow_naive
 
 
 class OrderStatus(str, enum.Enum):
@@ -38,9 +39,9 @@ class Order(Base):
     expires_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     raw_chat: Mapped[str | None] = mapped_column(Text)
     memo: Mapped[str | None] = mapped_column(Text)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow_naive)
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+        DateTime, default=utcnow_naive, onupdate=utcnow_naive
     )
 
     shop: Mapped["Shop"] = relationship("Shop", back_populates="orders")  # type: ignore[name-defined]
